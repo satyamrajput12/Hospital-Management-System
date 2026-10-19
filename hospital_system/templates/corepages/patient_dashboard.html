@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Patient Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">Welcome, {{ user.first_name|default:user.username }} 👋</h2>
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="stat-card" style="background-color:#0f766e;">
+      <div class="small">Upcoming Appointments</div>
+      <div class="fs-3 fw-bold">{{ upcoming_count }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card" style="background-color:#2563eb;">
+      <div class="small">Find a Doctor</div>
+      <a href="{% url 'doctors:list' %}" class="btn btn-light btn-sm mt-2">Browse Doctors</a>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stat-card" style="background-color:#f59e0b;">
+      <div class="small">My Appointments</div>
+      <a href="{% url 'appointments:my_appointments' %}" class="btn btn-light btn-sm mt-2">View All</a>
+    </div>
+  </div>
+</div>
+
+<div class="card card-hospital p-4">
+  <h5 class="mb-3">Recent Appointments</h5>
+  <table class="table">
+    <thead><tr><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for appt in appointments %}
+        <tr>
+          <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
+          <td>{{ appt.appointment_date }}</td>
+          <td>{{ appt.appointment_time }}</td>
+          <td><span class="badge badge-status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="text-muted text-center py-3">No appointments yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

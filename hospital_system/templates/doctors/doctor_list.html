@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Our Doctors{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Our Doctors</h2>
+  <form method="get" class="d-flex">
+    <select name="department" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">All Departments</option>
+      {% for dept in departments %}
+        <option value="{{ dept.pk }}" {% if selected_department == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+<div class="row g-3">
+  {% for doctor in doctors %}
+    <div class="col-md-4">
+      <div class="card card-hospital p-3">
+        <div class="d-flex align-items-center mb-2">
+          <div class="avatar-circle me-3">{{ doctor.user.first_name|first|upper }}{{ doctor.user.last_name|first|upper }}</div>
+          <div>
+            <div class="fw-semibold">Dr. {{ doctor.user.get_full_name }}</div>
+            <div class="text-muted small">{{ doctor.specialization }}</div>
+          </div>
+        </div>
+        <p class="small text-muted mb-2">{{ doctor.department.name }} &middot; {{ doctor.experience_years }} yrs experience</p>
+        <p class="small mb-2">Fee: ₹{{ doctor.consultation_fee }}</p>
+        <a href="{% url 'doctors:detail' doctor.pk %}" class="btn btn-sm btn-outline-primary">View & Book</a>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-muted">No doctors available yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

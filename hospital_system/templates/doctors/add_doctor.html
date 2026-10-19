@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Add Doctor{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card card-hospital p-4">
+      <h3 class="mb-3">Add New Doctor</h3>
+      <form method="post">
+        {% csrf_token %}
+        <h6 class="text-muted mt-2">Account Details</h6>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">First Name</label>
+            {{ user_form.first_name }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Last Name</label>
+            {{ user_form.last_name }}
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          {{ user_form.username }}
+          {{ user_form.username.errors }}
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Email</label>
+            {{ user_form.email }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Phone</label>
+            {{ user_form.phone }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Password</label>
+            {{ user_form.password1 }}
+            {{ user_form.password1.errors }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Confirm Password</label>
+            {{ user_form.password2 }}
+          </div>
+        </div>
+
+        <h6 class="text-muted mt-3">Professional Details</h6>
+        <div class="mb-3">
+          <label class="form-label">Department</label>
+          {{ profile_form.department }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Specialization</label>
+          {{ profile_form.specialization }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Qualification</label>
+          {{ profile_form.qualification }}
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Experience (years)</label>
+            {{ profile_form.experience_years }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Consultation Fee (₹)</label>
+            {{ profile_form.consultation_fee }}
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Bio</label>
+          {{ profile_form.bio }}
+        </div>
+        <button type="submit" class="btn btn-primary">Add Doctor</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

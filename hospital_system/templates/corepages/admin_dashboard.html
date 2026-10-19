@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">Admin Dashboard</h2>
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card" style="background-color:#0f766e;">
+      <div class="small">Doctors</div>
+      <div class="fs-3 fw-bold">{{ stats.total_doctors }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card" style="background-color:#2563eb;">
+      <div class="small">Departments</div>
+      <div class="fs-3 fw-bold">{{ stats.total_departments }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card" style="background-color:#f59e0b;">
+      <div class="small">Total Appointments</div>
+      <div class="fs-3 fw-bold">{{ stats.total_appointments }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card" style="background-color:#dc2626;">
+      <div class="small">Pending Appointments</div>
+      <div class="fs-3 fw-bold">{{ stats.pending_appointments }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <a href="{% url 'doctors:manage_list' %}" class="btn btn-outline-primary w-100 py-3">Manage Doctors</a>
+  </div>
+  <div class="col-md-4">
+    <a href="/admin/departments/department/" class="btn btn-outline-primary w-100 py-3">Manage Departments</a>
+  </div>
+  <div class="col-md-4">
+    <a href="{% url 'appointments:all_appointments' %}" class="btn btn-outline-primary w-100 py-3">All Appointments</a>
+  </div>
+</div>
+
+<div class="card card-hospital p-4">
+  <h5 class="mb-3">Recent Appointments</h5>
+  <table class="table">
+    <thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for appt in recent_appointments %}
+        <tr>
+          <td>{{ appt.patient.get_full_name|default:appt.patient.username }}</td>
+          <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
+          <td>{{ appt.appointment_date }}</td>
+          <td><span class="badge badge-status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="text-muted text-center py-3">No appointments yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}My Appointments{% endblock %}
+{% block content %}
+<h2 class="mb-4">My Appointments</h2>
+<div class="table-responsive">
+<table class="table table-hover bg-white rounded">
+  <thead>
+    <tr><th>Doctor</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for appt in appointments %}
+      <tr>
+        <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
+        <td>{{ appt.appointment_date }}</td>
+        <td>{{ appt.appointment_time }}</td>
+        <td>{{ appt.reason|truncatewords:8 }}</td>
+        <td><span class="badge badge-status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+        <td>
+          {% if appt.can_cancel %}
+            <a href="{% url 'appointments:cancel' appt.pk %}" class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('Cancel this appointment?');">Cancel</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="text-muted text-center py-3">No appointments yet. <a href="{% url 'doctors:list' %}">Book one now</a>.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

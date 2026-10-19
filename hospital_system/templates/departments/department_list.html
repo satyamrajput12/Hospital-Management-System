@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Departments{% endblock %}
+{% block content %}
+<h2 class="mb-4">Our Departments</h2>
+<div class="row g-3">
+  {% for dept in departments %}
+    <div class="col-md-4">
+      <div class="card card-hospital p-3">
+        <div class="fs-2 mb-2">{{ dept.icon|default:"🩺" }}</div>
+        <h5>{{ dept.name }}</h5>
+        <p class="text-muted small">{{ dept.description|truncatewords:20 }}</p>
+        <a href="{% url 'departments:detail' dept.pk %}" class="btn btn-sm btn-outline-primary">View Doctors</a>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-muted">No departments available yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

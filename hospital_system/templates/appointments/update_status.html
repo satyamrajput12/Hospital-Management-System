@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Update Appointment{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card card-hospital p-4">
+      <h3 class="mb-1">Update Appointment</h3>
+      <p class="text-muted">Patient: {{ appointment.patient.get_full_name|default:appointment.patient.username }}</p>
+      <p class="text-muted">{{ appointment.appointment_date }} at {{ appointment.appointment_time }}</p>
+      <p><strong>Reason:</strong> {{ appointment.reason }}</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">Status</label>
+          {{ form.status }}
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Notes</label>
+          {{ form.notes }}
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Save</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

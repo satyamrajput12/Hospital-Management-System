@@ -1,0 +1,434 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Medicare — Modern Healthcare & Consultations{% endblock %}</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Medicare Stylesheet -->
+  <link href="{% static 'css/medicare.css' %}?v=2.2" rel="stylesheet">
+  <link href="{% static 'css/style.css' %}" rel="stylesheet">
+  
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<header class="mc-header">
+  <div class="mc-navbar-container">
+    
+    <!-- Brand & Location -->
+    <div class="mc-brand-group">
+      <a href="{% url 'core:home' %}" class="mc-brand">
+        <svg class="mc-brand-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7 11L14.2 23.5C14.6 24.2 15.6 24.2 16 23.5L25 8" stroke="#121829" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 6L21.2 18.5C21.6 19.2 22.6 19.2 23 18.5L27 12" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>Medicare</span>
+      </a>
+
+      <!-- Location Dropdown -->
+      <div class="dropdown">
+        <div class="mc-location-picker" data-bs-toggle="dropdown" aria-expanded="false">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          <div>
+            <span class="mc-location-label">Select Location</span>
+            <span class="mc-location-val" id="mcCurrentLocation">New York</span> ▾
+          </div>
+        </div>
+        <ul class="dropdown-menu shadow border-0 rounded-4 p-2 mt-2" style="min-width: 180px;">
+          <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" onclick="setLocation('New York')">📍 New York</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" onclick="setLocation('San Francisco')">📍 San Francisco</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" onclick="setLocation('Chicago')">📍 Chicago</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" onclick="setLocation('London')">📍 London</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="javascript:void(0)" onclick="setLocation('Mumbai')">📍 Mumbai</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mc-search-form">
+      <div class="mc-search-wrapper">
+        <svg class="mc-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="mcSearchInput" class="mc-search-input" placeholder="Medicine and healthcare services...">
+      </div>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="mc-nav-actions">
+      <!-- Healthcare Services Dropdown -->
+      <div class="dropdown">
+        <a href="javascript:void(0)" class="mc-nav-link" data-bs-toggle="dropdown" aria-expanded="false">
+          <span>Healthcare Services</span>
+          <span class="mc-badge-new">NEW</span>
+          <span style="font-size: 0.75rem;">▾</span>
+        </a>
+        <ul class="dropdown-menu shadow border-0 rounded-4 p-2 mt-2">
+          <li><a class="dropdown-item rounded-3 py-2" href="{% url 'doctors:list' %}">🩺 Doctor Consultations</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="{% url 'departments:list' %}">🏥 Hospital Departments</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="#lab-tests-section">🧪 Lab Tests & Diagnostics</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="#pharmacy-section">💊 Pharmacy & Best Deals</a></li>
+        </ul>
+      </div>
+
+      <!-- Offers -->
+      <a href="#pharmacy-section" class="mc-nav-link">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path><circle cx="12" cy="12" r="4"></circle></svg>
+        <span>Offers</span>
+      </a>
+
+      <!-- Cart Button with Dynamic Badge -->
+      <button type="button" class="mc-cart-btn" onclick="openCartDrawer()">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+        <span>Cart</span>
+        <span class="mc-cart-badge">0</span>
+      </button>
+
+      <!-- Auth State -->
+      {% if user.is_authenticated %}
+        <div class="dropdown">
+          <a href="javascript:void(0)" class="mc-auth-btn primary dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            <span>Hi, {{ user.first_name|default:user.username }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mt-2">
+            <li><a class="dropdown-item rounded-3 py-2 fw-semibold" href="{% url 'core:redirect_dashboard' %}">📊 My Dashboard</a></li>
+            {% if user.is_patient_role %}
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'appointments:my_appointments' %}">📅 My Appointments</a></li>
+            {% elif user.is_doctor_role %}
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'appointments:doctor_appointments' %}">📅 Doctor Schedule</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'doctors:availability_manage' %}">⏰ Manage Availability</a></li>
+            {% elif user.is_superuser or user.is_admin_role %}
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'doctors:manage_list' %}">👨‍⚕️ Manage Doctors</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'appointments:all_appointments' %}">📋 All Appointments</a></li>
+            {% endif %}
+            <li><a class="dropdown-item rounded-3 py-2" href="{% url 'accounts:profile' %}">👤 Edit Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form method="post" action="{% url 'accounts:logout' %}" class="m-0 p-0">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item rounded-3 py-2 text-danger fw-semibold">Sign Out</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="mc-auth-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          <span>Login</span>
+        </a>
+        <a href="{% url 'accounts:register' %}" class="mc-auth-btn primary">
+          <span>Register</span>
+        </a>
+      {% endif %}
+
+    </div>
+  </div>
+</header>
+
+<!-- NOTIFICATIONS -->
+{% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- MAIN CONTENT -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- SHOPPING CART OFF-CANVAS DRAWER -->
+<div class="mc-cart-backdrop" id="mcCartBackdrop" onclick="closeCartDrawer()"></div>
+<div class="mc-cart-drawer" id="mcCartDrawer">
+  <div class="mc-cart-header">
+    <h4 class="mc-cart-title">Your Health Cart</h4>
+    <button type="button" class="mc-cart-close" onclick="closeCartDrawer()">&times;</button>
+  </div>
+  <div class="mc-cart-body" id="mcCartItems">
+    <!-- Dynamic Cart Content -->
+  </div>
+  <div class="mc-cart-footer">
+    <div class="mc-cart-subtotal">
+      <span>Subtotal:</span>
+      <span id="mcCartSubtotal">₹0.00</span>
+    </div>
+    <button type="button" class="mc-checkout-btn" onclick="showToast('Thank you! Order placed successfully.'); closeCartDrawer(); medicareCart = []; saveCart();">
+      Proceed to Checkout ➔
+    </button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="mc-footer">
+  <!-- Pre-Footer Highlight Cards -->
+  <div class="mc-footer-highlights">
+    <div class="mc-footer-container">
+      <div class="mc-highlights-grid">
+        <div class="mc-highlight-card">
+          <div class="mc-highlight-icon emergency">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          </div>
+          <div class="mc-highlight-content">
+            <span class="mc-highlight-badge">24/7 EMERGENCY</span>
+            <h4>Need Urgent Care?</h4>
+            <p>Immediate ambulance & trauma medical support available around the clock.</p>
+            <a href="tel:+18004562273" class="mc-highlight-btn emergency-btn">
+              <span>Call +1 (800) 456-CARE</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="mc-highlight-card">
+          <div class="mc-highlight-icon appointment">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="mc-highlight-content">
+            <span class="mc-highlight-badge verified">VERIFIED DOCTORS</span>
+            <h4>Book Consultation</h4>
+            <p>Connect with top board-certified specialists in hospital or online.</p>
+            <a href="{% url 'doctors:list' %}" class="mc-highlight-btn">
+              <span>Find a Specialist</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="mc-highlight-card">
+          <div class="mc-highlight-icon diagnostics">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"></path><path d="M14 9.3V1.99"></path><path d="M8.5 2h7"></path><path d="M14 9.3a6.5 6.5 0 1 1-4 0"></path><path d="M5.52 16h12.96"></path></svg>
+          </div>
+          <div class="mc-highlight-content">
+            <span class="mc-highlight-badge express">DOORSTEP SERVICE</span>
+            <h4>Lab Tests & Pharmacy</h4>
+            <p>Safe home sample collection & same-day doorstep medicine delivery.</p>
+            <a href="#lab-tests-section" class="mc-highlight-btn">
+              <span>Explore Diagnostics</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Footer Content -->
+  <div class="mc-footer-main">
+    <div class="mc-footer-container">
+      <div class="mc-footer-grid">
+        
+        <!-- Brand Column -->
+        <div class="mc-footer-col mc-col-brand">
+          <div class="mc-footer-brand-wrap">
+            <a href="{% url 'core:home' %}" class="mc-footer-brand">
+              <svg class="mc-brand-icon" viewBox="0 0 32 32" fill="none" style="width:32px;height:32px;">
+                <path d="M7 11L14.2 23.5C14.6 24.2 15.6 24.2 16 23.5L25 8" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M14 6L21.2 18.5C21.6 19.2 22.6 19.2 23 18.5L27 12" stroke="#60a5fa" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Medicare</span>
+            </a>
+            <span class="mc-status-indicator">
+              <span class="mc-pulse-dot"></span> 24/7 Active Healthcare
+            </span>
+          </div>
+          
+          <p class="mc-footer-desc">
+            Next-generation healthcare ecosystem offering verified specialist consultations, 60-second video telehealth, home diagnostics, and certified doorstep medicines.
+          </p>
+
+          <!-- Contact Quick Info -->
+          <div class="mc-footer-contact-box">
+            <div class="mc-contact-item">
+              <div class="mc-contact-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              </div>
+              <div>
+                <span class="mc-contact-label">Toll-Free Helpline</span>
+                <span class="mc-contact-value">+1 (800) 456-CARE</span>
+              </div>
+            </div>
+            <div class="mc-contact-item">
+              <div class="mc-contact-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              </div>
+              <div>
+                <span class="mc-contact-label">Support Email</span>
+                <span class="mc-contact-value">support@medicare-health.org</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Social Links -->
+          <div class="mc-footer-socials">
+            <a href="https://twitter.com" target="_blank" rel="noopener" class="mc-social-btn" aria-label="Twitter / X">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noopener" class="mc-social-btn" aria-label="Facebook">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener" class="mc-social-btn" aria-label="LinkedIn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener" class="mc-social-btn" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noopener" class="mc-social-btn" aria-label="YouTube">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Col 2: Services -->
+        <div class="mc-footer-col">
+          <h5 class="mc-footer-title">Healthcare Services</h5>
+          <ul class="mc-footer-links">
+            <li><a href="{% url 'doctors:list' %}"><span class="mc-link-bullet">›</span> In-Clinic Doctor Visit</a></li>
+            <li><a href="{% url 'doctors:list' %}"><span class="mc-link-bullet">›</span> Instant Video Consult <span class="mc-tag-sm">Fast</span></a></li>
+            <li><a href="#lab-tests-section"><span class="mc-link-bullet">›</span> Diagnostic Lab Tests</a></li>
+            <li><a href="#pharmacy-section"><span class="mc-link-bullet">›</span> Doorstep Pharmacy <span class="mc-tag-sm discount">-20%</span></a></li>
+            <li><a href="{% url 'departments:list' %}"><span class="mc-link-bullet">›</span> Hospital Departments</a></li>
+            <li><a href="#popular-doctors-section"><span class="mc-link-bullet">›</span> Top Rated Specialists</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Specialties -->
+        <div class="mc-footer-col">
+          <h5 class="mc-footer-title">Specialties</h5>
+          <ul class="mc-footer-links">
+            <li><a href="{% url 'departments:list' %}"><span class="mc-link-bullet">›</span> Cardiology & Heart</a></li>
+            <li><a href="{% url 'departments:list' %}"><span class="mc-link-bullet">›</span> Neurology & Spine</a></li>
+            <li><a href="{% url 'departments:list' %}"><span class="mc-link-bullet">›</span> Orthopedics & Joints</a></li>
+            <li><a href="{% url 'departments:list' %}"><span class="mc-link-bullet">›</span> Dermatology & Skin</a></li>
+            <li><a href="{% url 'departments:list' %}"><span class="mc-link-bullet">›</span> Pediatrics & Child</a></li>
+            <li><a href="{% url 'departments:list' %}"><span class="mc-link-bullet">›</span> General Medicine</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Portals & Access -->
+        <div class="mc-footer-col">
+          <h5 class="mc-footer-title">Portals & Support</h5>
+          <ul class="mc-footer-links">
+            {% if user.is_authenticated %}
+              <li><a href="{% url 'core:redirect_dashboard' %}"><span class="mc-link-bullet">›</span> My Health Dashboard</a></li>
+              {% if user.is_patient_role %}
+                <li><a href="{% url 'appointments:my_appointments' %}"><span class="mc-link-bullet">›</span> My Appointments</a></li>
+              {% elif user.is_doctor_role %}
+                <li><a href="{% url 'appointments:doctor_appointments' %}"><span class="mc-link-bullet">›</span> Doctor Schedule</a></li>
+                <li><a href="{% url 'doctors:availability_manage' %}"><span class="mc-link-bullet">›</span> Manage Availability</a></li>
+              {% elif user.is_superuser or user.is_admin_role %}
+                <li><a href="{% url 'doctors:manage_list' %}"><span class="mc-link-bullet">›</span> Manage Doctors</a></li>
+                <li><a href="{% url 'appointments:all_appointments' %}"><span class="mc-link-bullet">›</span> Hospital Appointment Logs</a></li>
+              {% endif %}
+              <li><a href="{% url 'accounts:profile' %}"><span class="mc-link-bullet">›</span> Profile & Settings</a></li>
+            {% else %}
+              <li><a href="{% url 'accounts:login' %}"><span class="mc-link-bullet">›</span> Patient Portal Login</a></li>
+              <li><a href="{% url 'accounts:login' %}"><span class="mc-link-bullet">›</span> Doctor Portal Login</a></li>
+              <li><a href="{% url 'accounts:register' %}"><span class="mc-link-bullet">›</span> Create Free Account</a></li>
+            {% endif %}
+            <li><a href="/admin/"><span class="mc-link-bullet">›</span> Hospital Administration</a></li>
+            <li><a href="javascript:void(0)" onclick="openCartDrawer()"><span class="mc-link-bullet">›</span> Cart & Orders</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 5: Newsletter -->
+        <div class="mc-footer-col mc-col-newsletter">
+          <h5 class="mc-footer-title">Stay Informed</h5>
+          <p class="mc-footer-subtext">
+            Subscribe for verified health tips, seasonal wellness alerts, and special prescription discounts.
+          </p>
+          <form class="mc-newsletter-form" onsubmit="handleNewsletterSubmit(event)">
+            <div class="mc-newsletter-input-group">
+              <input type="email" id="mcNewsletterEmail" class="mc-newsletter-input" placeholder="Enter your email..." required>
+              <button type="submit" class="mc-newsletter-btn" aria-label="Subscribe">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              </button>
+            </div>
+            <div class="mc-newsletter-note">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Zero spam &middot; Unsubscribe anytime</span>
+            </div>
+          </form>
+
+          <div class="mc-mobile-app-prompt">
+            <span class="mc-app-title">🚑 Emergency Ready 24/7</span>
+            <span class="mc-app-desc">Ambulance dispatch & trauma care available across all zones.</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Trust Badges Strip -->
+      <div class="mc-footer-badges">
+        <div class="mc-badge-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>HIPAA Compliant</span>
+        </div>
+        <div class="mc-badge-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+          <span>JCI Gold Accredited</span>
+        </div>
+        <div class="mc-badge-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>256-Bit SSL Security</span>
+        </div>
+        <div class="mc-badge-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          <span>100% Board Certified</span>
+        </div>
+        <div class="mc-badge-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>15-Min Fast Response</span>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="mc-footer-bottom">
+        <div class="mc-footer-copyright">
+          &copy; {% now "Y" %} Medicare Health Systems Inc. All rights reserved. &middot; Compassionate care, modern science.
+        </div>
+        
+        <div class="mc-footer-legal">
+          <a href="javascript:void(0)" onclick="showToast('Privacy Policy: Your health records are encrypted and protected under HIPAA.')">Privacy Policy</a>
+          <span class="mc-dot">&middot;</span>
+          <a href="javascript:void(0)" onclick="showToast('Terms of Service: Standard clinical telehealth care provisions apply.')">Terms of Service</a>
+          <span class="mc-dot">&middot;</span>
+          <a href="javascript:void(0)" onclick="showToast('Patient Rights: High standard care with total transparent access.')">Patient Rights</a>
+          <span class="mc-dot">&middot;</span>
+          <a href="javascript:void(0)" onclick="showToast('Security: 256-bit encrypted data protection in effect.')">Security</a>
+        </div>
+
+        <button type="button" class="mc-back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Back to top">
+          <span>Back to Top</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/medicare.js' %}"></script>
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

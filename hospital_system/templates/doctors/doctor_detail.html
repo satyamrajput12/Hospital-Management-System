@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Dr. {{ doctor.user.get_full_name }}{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card card-hospital p-4 mb-3">
+      <div class="d-flex align-items-center mb-3">
+        <div class="avatar-circle me-3" style="width:64px;height:64px;font-size:1.4rem;">{{ doctor.user.first_name|first|upper }}{{ doctor.user.last_name|first|upper }}</div>
+        <div>
+          <h3 class="mb-0">Dr. {{ doctor.user.get_full_name }}</h3>
+          <p class="text-muted mb-0">{{ doctor.specialization }} &middot; {{ doctor.department.name }}</p>
+        </div>
+      </div>
+      <p><strong>Qualification:</strong> {{ doctor.qualification|default:"—" }}</p>
+      <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
+      <p><strong>Consultation Fee:</strong> ₹{{ doctor.consultation_fee }}</p>
+      <p>{{ doctor.bio }}</p>
+    </div>
+
+    <div class="card card-hospital p-4">
+      <h5 class="mb-3">Availability</h5>
+      {% if availabilities %}
+        <ul class="list-group list-group-flush">
+          {% for slot in availabilities %}
+            <li class="list-group-item">{{ slot.get_day_of_week_display }}: {{ slot.start_time }} - {{ slot.end_time }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">Availability not set yet. Please check with reception.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-hospital p-4 text-center">
+      <h5>Ready to book?</h5>
+      {% if user.is_authenticated and user.is_patient_role %}
+        <a href="{% url 'appointments:book' doctor.pk %}" class="btn btn-primary mt-2">Book Appointment</a>
+      {% elif user.is_authenticated %}
+        <p class="text-muted small">Only patients can book appointments.</p>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="btn btn-primary mt-2">Login to Book</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
