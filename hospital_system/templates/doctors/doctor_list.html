@@ -1,35 +1,398 @@
 {% extends 'base.html' %}
-{% block title %}Our Doctors{% endblock %}
+{% load static %}
+
+{% block title %}Find & Book Top Doctors — Medicare{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2>Our Doctors</h2>
-  <form method="get" class="d-flex">
-    <select name="department" class="form-select form-select-sm" onchange="this.form.submit()">
-      <option value="">All Departments</option>
-      {% for dept in departments %}
-        <option value="{{ dept.pk }}" {% if selected_department == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
-      {% endfor %}
-    </select>
-  </form>
-</div>
-<div class="row g-3">
-  {% for doctor in doctors %}
-    <div class="col-md-4">
-      <div class="card card-hospital p-3">
-        <div class="d-flex align-items-center mb-2">
-          <div class="avatar-circle me-3">{{ doctor.user.first_name|first|upper }}{{ doctor.user.last_name|first|upper }}</div>
-          <div>
-            <div class="fw-semibold">Dr. {{ doctor.user.get_full_name }}</div>
-            <div class="text-muted small">{{ doctor.specialization }}</div>
-          </div>
+<section class="mc-doc-directory-page">
+
+  <!-- Breadcrumb -->
+  <nav class="mc-breadcrumb" aria-label="breadcrumb">
+    <a href="{% url 'core:home' %}"><i class="bi bi-house-door me-1"></i>Home</a>
+    <span class="separator">/</span>
+    <span class="current">Our Doctors</span>
+  </nav>
+
+  <!-- 1. HERO HEADER -->
+  <div class="mc-doc-hero">
+    <div class="mc-doc-hero-content">
+      <div class="mc-doc-hero-left">
+        <div class="mc-doc-hero-badge">
+          <span class="pulse-dot"></span>
+          <span>100% VERIFIED MEDICAL SPECIALISTS</span>
         </div>
-        <p class="small text-muted mb-2">{{ doctor.department.name }} &middot; {{ doctor.experience_years }} yrs experience</p>
-        <p class="small mb-2">Fee: ₹{{ doctor.consultation_fee }}</p>
-        <a href="{% url 'doctors:detail' doctor.pk %}" class="btn btn-sm btn-outline-primary">View & Book</a>
+        <h1 class="mc-doc-hero-title">
+          Find & Book Top <span>Healthcare Specialists</span>
+        </h1>
+        <p class="mc-doc-hero-desc">
+          Schedule in-person hospital visits or digital video consultations with board-certified physicians, leading surgeons, and seasoned specialists. Guaranteed slot booking and transparent fees.
+        </p>
+      </div>
+
+      <div class="mc-doc-hero-stats">
+        <div class="mc-doc-stat-pill">
+          <div class="mc-doc-stat-num">{{ total_doctors|default:"6" }}+</div>
+          <div class="mc-doc-stat-label">Specialists</div>
+        </div>
+        <div class="mc-doc-stat-pill">
+          <div class="mc-doc-stat-num">4.9 ★</div>
+          <div class="mc-doc-stat-label">Patient Rating</div>
+        </div>
+        <div class="mc-doc-stat-pill">
+          <div class="mc-doc-stat-num">100%</div>
+          <div class="mc-doc-stat-label">Verified Care</div>
+        </div>
       </div>
     </div>
-  {% empty %}
-    <p class="text-muted">No doctors available yet.</p>
-  {% endfor %}
-</div>
+  </div>
+
+  <!-- 2. SEARCH & ADVANCED FILTER PANEL -->
+  <div class="mc-doc-filter-panel">
+    <form method="get" action="{% url 'doctors:list' %}" class="mc-doc-filter-form" id="doctorFilterForm">
+      
+      <!-- Search Input -->
+      <div class="mc-filter-input-wrap">
+        <i class="bi bi-search mc-input-icon"></i>
+        <input 
+          type="text" 
+          name="q" 
+          class="mc-filter-input" 
+          placeholder="Search by doctor name, specialty, condition, qualification..." 
+          value="{{ query|default:'' }}"
+        >
+      </div>
+
+      <!-- Department Selector -->
+      <select name="department" class="mc-filter-select" onchange="document.getElementById('doctorFilterForm').submit()">
+        <option value="">All Departments</option>
+        {% for dept in departments %}
+          <option value="{{ dept.pk }}" {% if selected_department == dept.pk|stringformat:"s" %}selected{% endif %}>
+            {{ dept.name }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <!-- Day of Week Selector -->
+      <select name="day" class="mc-filter-select" onchange="document.getElementById('doctorFilterForm').submit()">
+        <option value="">Any Available Day</option>
+        {% for code, name in days_of_week %}
+          <option value="{{ code }}" {% if selected_day == code %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Sort By Selector -->
+      <select name="sort" class="mc-filter-select" onchange="document.getElementById('doctorFilterForm').submit()">
+        <option value="">Sort: Recommended</option>
+        <option value="experience" {% if selected_sort == 'experience' %}selected{% endif %}>Most Experienced</option>
+        <option value="fee_low" {% if selected_sort == 'fee_low' %}selected{% endif %}>Fee: Low to High</option>
+        <option value="fee_high" {% if selected_sort == 'fee_high' %}selected{% endif %}>Fee: High to Low</option>
+      </select>
+
+      <!-- Action Buttons -->
+      <div class="mc-filter-btn-group">
+        <button type="submit" class="mc-filter-submit-btn">
+          <i class="bi bi-funnel-fill"></i>
+          <span>Filter</span>
+        </button>
+        {% if query or selected_department or selected_day or selected_sort or selected_max_fee %}
+          <a href="{% url 'doctors:list' %}" class="mc-filter-reset-btn" title="Clear all filters">
+            <i class="bi bi-x-lg"></i>
+          </a>
+        {% endif %}
+      </div>
+
+    </form>
+  </div>
+
+  <!-- 3. FAST 1-CLICK DEPARTMENT PILLS -->
+  <div class="mc-dept-pills-bar">
+    <a href="{% url 'doctors:list' %}" class="mc-dept-pill {% if not selected_department %}active{% endif %}">
+      <span class="mc-pill-emoji">🩺</span>
+      <span>All Doctors</span>
+    </a>
+    {% for dept in departments %}
+      <a 
+        href="{% url 'doctors:list' %}?department={{ dept.pk }}{% if query %}&q={{ query }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}" 
+        class="mc-dept-pill {% if selected_department == dept.pk|stringformat:'s' %}active{% endif %}"
+      >
+        <span class="mc-pill-emoji">
+          {% if 'cardio' in dept.name|lower %}❤️
+          {% elif 'neuro' in dept.name|lower %}🧠
+          {% elif 'ortho' in dept.name|lower %}🦴
+          {% elif 'pediat' in dept.name|lower %}👶
+          {% elif 'derma' in dept.name|lower %}🧴
+          {% elif 'general' in dept.name|lower %}🩺
+          {% elif dept.icon %}{{ dept.icon }}
+          {% else %}🏥{% endif %}
+        </span>
+        <span>{{ dept.name }}</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <!-- 4. RESULTS META ROW -->
+  <div class="mc-results-meta-row">
+    <div class="mc-results-count">
+      Showing <strong>{{ total_doctors }}</strong> verified medical specialist{{ total_doctors|pluralize }}
+    </div>
+
+    <!-- Active Filter Tags -->
+    {% if query or selected_department or selected_day or selected_sort %}
+      <div class="mc-active-tags">
+        {% if query %}
+          <span class="mc-filter-chip">
+            Search: "{{ query }}"
+            <a href="{% url 'doctors:list' %}?department={{ selected_department|default:'' }}&day={{ selected_day|default:'' }}&sort={{ selected_sort|default:'' }}">&times;</a>
+          </span>
+        {% endif %}
+
+        {% if selected_department %}
+          {% for dept in departments %}
+            {% if selected_department == dept.pk|stringformat:"s" %}
+              <span class="mc-filter-chip">
+                Dept: {{ dept.name }}
+                <a href="{% url 'doctors:list' %}?q={{ query|default:'' }}&day={{ selected_day|default:'' }}&sort={{ selected_sort|default:'' }}">&times;</a>
+              </span>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {% if selected_day %}
+          {% for code, name in days_of_week %}
+            {% if selected_day == code %}
+              <span class="mc-filter-chip">
+                Day: {{ name }}
+                <a href="{% url 'doctors:list' %}?q={{ query|default:'' }}&department={{ selected_department|default:'' }}&sort={{ selected_sort|default:'' }}">&times;</a>
+              </span>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {% if selected_sort %}
+          <span class="mc-filter-chip">
+            Sorted: {{ selected_sort|title }}
+            <a href="{% url 'doctors:list' %}?q={{ query|default:'' }}&department={{ selected_department|default:'' }}&day={{ selected_day|default:'' }}">&times;</a>
+          </span>
+        {% endif %}
+
+        <a href="{% url 'doctors:list' %}" class="small text-danger fw-semibold text-decoration-none ms-2">
+          Reset all
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- 5. DOCTORS GRID -->
+  {% if doctors %}
+    <div class="mc-doc-grid-v2">
+      {% for doctor in doctors %}
+        <article class="mc-doc-card-v2">
+          
+          <!-- Card Header: Department & Verified Badge -->
+          <div class="mc-doc-card-header">
+            <span class="mc-doc-dept-badge {% if 'cardio' in doctor.department.name|lower %}cardiology{% elif 'neuro' in doctor.department.name|lower %}neurology{% elif 'ortho' in doctor.department.name|lower %}orthopedics{% elif 'pediat' in doctor.department.name|lower %}pediatrics{% elif 'derma' in doctor.department.name|lower %}dermatology{% else %}general{% endif %}">
+              {% if 'cardio' in doctor.department.name|lower %}❤️
+              {% elif 'neuro' in doctor.department.name|lower %}🧠
+              {% elif 'ortho' in doctor.department.name|lower %}🦴
+              {% elif 'pediat' in doctor.department.name|lower %}👶
+              {% elif 'derma' in doctor.department.name|lower %}🧴
+              {% else %}🩺{% endif %}
+              {{ doctor.department.name }}
+            </span>
+
+            <span class="mc-doc-verified-badge">
+              <i class="bi bi-patch-check-fill text-success"></i>
+              <span>Verified Specialist</span>
+            </span>
+          </div>
+
+          <!-- Card Body: Avatar, Name, Specialty, Experience, Bio -->
+          <div class="mc-doc-card-body">
+            
+            <div class="mc-doc-identity-row">
+              <div class="mc-doc-avatar-container">
+                {% if doctor.user.profile_picture %}
+                  <img 
+                    src="{{ doctor.user.profile_picture.url }}" 
+                    alt="Dr. {{ doctor.user.get_full_name }}" 
+                    class="mc-doc-avatar-photo"
+                  >
+                {% else %}
+                  <div class="mc-doc-avatar-fallback">
+                    {{ doctor.user.first_name|first|upper }}{{ doctor.user.last_name|first|upper }}
+                  </div>
+                {% endif %}
+                <span class="mc-doc-online-badge" title="Active & Available"></span>
+              </div>
+
+              <div class="mc-doc-name-wrap">
+                <a href="{% url 'doctors:detail' doctor.pk %}" class="mc-doc-name" title="Dr. {{ doctor.user.get_full_name }}">
+                  Dr. {{ doctor.user.get_full_name }}
+                </a>
+                <div class="mc-doc-specialty">{{ doctor.specialization }}</div>
+                <div class="mc-doc-qualification">
+                  <i class="bi bi-mortarboard me-1 text-primary"></i>
+                  {{ doctor.qualification|default:"MBBS, Specialist MD" }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Features Pills -->
+            <div class="mc-doc-features-grid">
+              <div class="mc-doc-feature-pill">
+                <i class="bi bi-award-fill"></i>
+                <span>{{ doctor.experience_years }}+ Yrs Experience</span>
+              </div>
+              <div class="mc-doc-feature-pill">
+                <i class="bi bi-star-fill text-warning"></i>
+                <span>4.9 (120+ reviews)</span>
+              </div>
+              <div class="mc-doc-feature-pill">
+                <i class="bi bi-geo-alt-fill text-danger"></i>
+                <span>Medicare Hospital</span>
+              </div>
+              <div class="mc-doc-feature-pill">
+                <i class="bi bi-calendar2-check-fill text-success"></i>
+                <span>Slots Available</span>
+              </div>
+            </div>
+
+            <!-- Short Bio Snippet -->
+            <div class="mc-doc-bio-snippet">
+              {{ doctor.bio|default:"Dedicated specialist delivering comprehensive clinical diagnostic consultations, personalized patient therapy programs, and modern evidence-based healthcare." }}
+            </div>
+
+          </div>
+
+          <!-- Card Footer: Fee & Action Buttons -->
+          <div class="mc-doc-card-footer-v2">
+            <div class="mc-doc-fee-stack">
+              <span class="mc-doc-fee-prefix">Consultation Fee</span>
+              <div class="mc-doc-fee-amount">
+                ₹{{ doctor.consultation_fee|floatformat:0 }}
+                <small>/ visit</small>
+              </div>
+            </div>
+
+            <div class="mc-doc-card-actions">
+              <a href="{% url 'doctors:detail' doctor.pk %}" class="mc-doc-btn-view" title="View Full Clinical Profile & Schedule">
+                <i class="bi bi-info-circle"></i>
+              </a>
+
+              {% if user.is_authenticated and user.is_patient_role %}
+                <a href="{% url 'appointments:book' doctor.pk %}" class="mc-doc-btn-book">
+                  <span>Book Appointment</span>
+                  <span class="arrow">➔</span>
+                </a>
+              {% else %}
+                <a href="{% url 'doctors:detail' doctor.pk %}" class="mc-doc-btn-book">
+                  <span>View & Book</span>
+                  <span class="arrow">➔</span>
+                </a>
+              {% endif %}
+            </div>
+          </div>
+
+        </article>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination if needed -->
+    {% if page_obj.has_other_pages %}
+      <nav aria-label="Page navigation" class="d-flex justify-content-center my-4">
+        <ul class="pagination pagination-rounded gap-2">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link rounded-pill px-3" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if selected_day %}&day={{ selected_day }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                &laquo; Prev
+              </a>
+            </li>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+              <li class="page-item active">
+                <span class="page-link rounded-pill px-3">{{ num }}</span>
+              </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link rounded-pill px-3" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if selected_day %}&day={{ selected_day }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                  {{ num }}
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link rounded-pill px-3" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}{% if selected_day %}&day={{ selected_day }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">
+                Next &raquo;
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <!-- 6. EMPTY STATE -->
+    <div class="mc-doc-empty-state">
+      <div class="mc-doc-empty-icon">
+        <i class="bi bi-search-heart"></i>
+      </div>
+      <h3 class="mc-doc-empty-title">No Doctors Found</h3>
+      <p class="mc-doc-empty-desc">
+        We couldn't find any healthcare specialists matching your selected filters or search terms. Please try searching another specialty or reset your filters.
+      </p>
+      <a href="{% url 'doctors:list' %}" class="mc-filter-submit-btn text-decoration-none d-inline-flex">
+        <i class="bi bi-arrow-counterclockwise"></i>
+        <span>Show All Doctors</span>
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- 7. TRUST & SAFETY BANNER -->
+  <div class="mc-trust-grid">
+    <div class="mc-trust-card">
+      <div class="mc-trust-icon text-primary">
+        <i class="bi bi-shield-fill-check"></i>
+      </div>
+      <div class="mc-trust-info">
+        <h5>100% Board Certified</h5>
+        <p>All doctors undergo rigorous multi-step background checks and license verification.</p>
+      </div>
+    </div>
+
+    <div class="mc-trust-card">
+      <div class="mc-trust-icon text-success">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <div class="mc-trust-info">
+        <h5>Zero Waiting Queue</h5>
+        <p>Guaranteed on-time consultations with dedicated calendar scheduling.</p>
+      </div>
+    </div>
+
+    <div class="mc-trust-card">
+      <div class="mc-trust-icon text-info">
+        <i class="bi bi-file-earmark-medical-fill"></i>
+      </div>
+      <div class="mc-trust-info">
+        <h5>Digital Prescriptions</h5>
+        <p>Access your prescriptions, lab orders, and doctor notes securely anytime.</p>
+      </div>
+    </div>
+
+    <div class="mc-trust-card">
+      <div class="mc-trust-icon text-warning">
+        <i class="bi bi-arrow-repeat"></i>
+      </div>
+      <div class="mc-trust-info">
+        <h5>Free Rescheduling</h5>
+        <p>Flexibly reschedule or cancel your appointment up to 2 hours prior to slot.</p>
+      </div>
+    </div>
+  </div>
+
+</section>
 {% endblock %}

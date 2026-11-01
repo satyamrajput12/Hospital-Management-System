@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} — Medicare Pharmacy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'core:pharmacy_list' %}">Pharmacy</a></li>
+      {% if product.category %}
+        <li class="breadcrumb-item"><a href="{% url 'core:pharmacy_list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-5">
+    <div class="row g-5 align-items-center">
+      <div class="col-md-5 text-center">
+        <div class="p-4 rounded-4 bg-light d-flex align-items-center justify-content-center" style="min-height: 320px;">
+          <img src="{% if product.image %}{{ product.image.url }}{% elif product.image_url_fallback %}{{ product.image_url_fallback }}{% else %}{% static 'images/prod_1.jpg' %}{% endif %}" alt="{{ product.name }}" style="max-height: 280px; max-width: 100%; object-fit: contain;">
+        </div>
+      </div>
+      <div class="col-md-7">
+        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-bold mb-2">
+          {{ product.category.name|default:"General Health" }}
+        </span>
+        <h2 class="fw-bold text-dark mb-2">{{ product.name }}</h2>
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span class="text-warning fw-bold">★ {{ product.rating }} Rating</span>
+          <span class="text-muted">&middot;</span>
+          {% if product.is_in_stock %}
+            <span class="text-success fw-semibold">✓ In Stock ({{ product.stock }} units)</span>
+          {% else %}
+            <span class="text-danger fw-semibold">✕ Out of Stock</span>
+          {% endif %}
+        </div>
+
+        <div class="d-flex align-items-baseline gap-3 mb-4">
+          <span class="display-6 fw-bold text-dark">₹{{ product.effective_price }}</span>
+          {% if product.discount_percent > 0 %}
+            <span class="fs-4 text-muted text-decoration-line-through">₹{{ product.price }}</span>
+            <span class="badge bg-danger rounded-pill px-2 py-1">{{ product.discount_percent }}% OFF</span>
+          {% endif %}
+        </div>
+
+        <p class="text-muted mb-4">{{ product.description }}</p>
+
+        <div class="d-flex align-items-center gap-3">
+          {% if product.is_in_stock %}
+            <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold fs-6" onclick="addToCart({{ product.pk }}, '{{ product.name|escapejs }}', {{ product.effective_price }})">
+              🛒 Add to Health Cart
+            </button>
+          {% else %}
+            <button type="button" class="btn btn-secondary rounded-pill px-4 py-2" disabled>
+              Temporarily Unavailable
+            </button>
+          {% endif %}
+          <a href="{% url 'core:pharmacy_list' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+            Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  {% if related_products %}
+    <h4 class="fw-bold mb-3">Related Health Products</h4>
+    <div class="row g-3">
+      {% for rel in related_products %}
+        <div class="col-sm-6 col-md-3">
+          <div class="card h-100 border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-column">
+            <div class="text-center py-2 mb-2">
+              <a href="{% url 'core:product_detail' rel.pk %}">
+                <img src="{% if rel.image %}{{ rel.image.url }}{% elif rel.image_url_fallback %}{{ rel.image_url_fallback }}{% else %}{% static 'images/prod_1.jpg' %}{% endif %}" alt="{{ rel.name }}" style="max-height: 110px; object-fit: contain;">
+              </a>
+            </div>
+            <h6 class="fw-bold mb-1 flex-grow-1">
+              <a href="{% url 'core:product_detail' rel.pk %}" class="text-dark text-decoration-none">{{ rel.name }}</a>
+            </h6>
+            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+              <span class="fw-bold text-dark">₹{{ rel.effective_price }}</span>
+              <button type="button" class="btn btn-xs btn-primary rounded-pill px-2" onclick="addToCart({{ rel.pk }}, '{{ rel.name|escapejs }}', {{ rel.effective_price }})">
+                + Add
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

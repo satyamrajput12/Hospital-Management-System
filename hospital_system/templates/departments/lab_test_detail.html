@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ test.name }} — Medicare Diagnostics{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'departments:lab_test_list' %}">Lab Tests</a></li>
+      {% if test.department %}
+        <li class="breadcrumb-item"><a href="{% url 'departments:detail' test.department.pk %}">{{ test.department.name }}</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active" aria-current="page">{{ test.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-5">
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-bold mb-2">
+          {{ test.department.name|default:"Diagnostic Center" }}
+        </span>
+        <h2 class="fw-bold text-dark mb-3">{{ test.name }}</h2>
+        <p class="text-muted lead fs-6 mb-4">{{ test.description }}</p>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <div class="p-3 rounded-4 bg-light">
+              <span class="text-muted small">Sample Type Required:</span>
+              <div class="fw-bold text-dark mt-1">🧪 {{ test.sample_type }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3 rounded-4 bg-light">
+              <span class="text-muted small">Report Turnaround Time:</span>
+              <div class="fw-bold text-dark mt-1">⏱ {{ test.duration }}</div>
+            </div>
+          </div>
+        </div>
+
+        {% if test.preparation_instructions %}
+          <div class="alert alert-warning rounded-4 p-3 mb-4">
+            <h6 class="fw-bold text-dark mb-1">📋 Preparation Guidelines:</h6>
+            <div class="small text-muted mb-0">{{ test.preparation_instructions }}</div>
+          </div>
+        {% endif %}
+
+        <div class="d-flex align-items-center gap-3">
+          <a href="{% url 'departments:book_lab_test' test.pk %}" class="btn btn-success rounded-pill px-4 py-3 fw-bold fs-6">
+            Book Home Sample / Hospital Walk-In ➔
+          </a>
+          <a href="{% url 'departments:lab_test_list' %}" class="btn btn-outline-secondary rounded-pill px-4 py-3">
+            Browse Other Tests
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card border-0 rounded-4 p-4 text-center" style="background: #f0fdf4; border: 1px solid #bbf7d0 !important;">
+          <span class="text-muted small">Diagnostic Fee</span>
+          <div class="display-6 fw-bold text-success my-2">₹{{ test.effective_price }}</div>
+          {% if test.discount_price and test.discount_price < test.price %}
+            <span class="text-muted text-decoration-line-through">Original: ₹{{ test.price }}</span>
+            <span class="badge bg-danger rounded-pill mx-auto mt-2 px-3 py-1">{{ test.discount_percentage }}% Discount Applied</span>
+          {% endif %}
+
+          <hr class="my-4">
+
+          <div class="text-start small">
+            <div class="d-flex align-items-center gap-2 mb-2 text-dark">
+              <span>✓</span> Free Home Sample Collection
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-2 text-dark">
+              <span>✓</span> 100% NABL & JCI Accredited Lab
+            </div>
+            <div class="d-flex align-items-center gap-2 mb-2 text-dark">
+              <span>✓</span> Digital Reports in Patient Dashboard
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if related_tests %}
+    <h4 class="fw-bold mb-3">Other Tests in {{ test.department.name }}</h4>
+    <div class="row g-3">
+      {% for rel in related_tests %}
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+            <h6 class="fw-bold mb-1">
+              <a href="{% url 'departments:lab_test_detail' rel.pk %}" class="text-dark text-decoration-none">{{ rel.name }}</a>
+            </h6>
+            <div class="d-flex justify-content-between align-items-center pt-2 mt-2 border-top">
+              <span class="fw-bold text-dark">₹{{ rel.effective_price }}</span>
+              <a href="{% url 'departments:book_lab_test' rel.pk %}" class="btn btn-sm btn-outline-success rounded-pill px-3">Book</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Your Health Cart — Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fw-bold mb-0">Your Shopping Cart</h2>
+    <a href="{% url 'core:pharmacy_list' %}" class="btn btn-outline-primary rounded-pill px-3">
+      ← Continue Shopping
+    </a>
+  </div>
+
+  {% if items %}
+    <div class="row g-4">
+      <!-- Items Table -->
+      <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-4">Product</th>
+                  <th>Price</th>
+                  <th style="width: 150px;">Quantity</th>
+                  <th>Subtotal</th>
+                  <th class="text-end pe-4">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in items %}
+                  <tr>
+                    <td class="ps-4">
+                      <div class="d-flex align-items-center gap-3">
+                        <img src="{% if item.product.image %}{{ item.product.image.url }}{% elif item.product.image_url_fallback %}{{ item.product.image_url_fallback }}{% else %}{% static 'images/prod_1.jpg' %}{% endif %}" alt="{{ item.product.name }}" class="rounded" style="width: 50px; height: 50px; object-fit: contain;">
+                        <div>
+                          <h6 class="fw-bold mb-0">
+                            <a href="{% url 'core:product_detail' item.product.pk %}" class="text-dark text-decoration-none">{{ item.product.name }}</a>
+                          </h6>
+                          <div class="small text-muted">{{ item.product.category.name|default:"General Health" }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="fw-semibold">₹{{ item.product.effective_price }}</td>
+                    <td>
+                      <form method="post" action="{% url 'core:update_cart_api' %}" class="d-flex align-items-center gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="item_id" value="{{ item.pk }}">
+                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="form-control form-control-sm text-center rounded-pill" style="width: 70px;">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Update quantity">✓</button>
+                      </form>
+                    </td>
+                    <td class="fw-bold text-dark">₹{{ item.subtotal }}</td>
+                    <td class="text-end pe-4">
+                      <form method="post" action="{% url 'core:remove_cart_api' item.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Remove {{ item.product.name }} from cart?');">
+                          &times; Remove
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Card -->
+      <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 100px;">
+          <h4 class="fw-bold mb-3 border-bottom pb-2">Order Summary</h4>
+          
+          <div class="d-flex justify-content-between mb-2 text-muted">
+            <span>Items Subtotal:</span>
+            <span class="text-dark fw-semibold">₹{{ subtotal }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 text-muted">
+            <span>Standard Delivery:</span>
+            {% if shipping == 0 %}
+              <span class="text-success fw-bold">FREE</span>
+            {% else %}
+              <span class="text-dark fw-semibold">₹{{ shipping }}</span>
+            {% endif %}
+          </div>
+
+          {% if subtotal < 500 %}
+            <div class="alert alert-info py-2 px-3 small rounded-3 my-2">
+              💡 Add items worth <strong>₹{{ 500|floatformat:2 }}</strong> more for <strong>FREE Delivery</strong>!
+            </div>
+          {% endif %}
+
+          <hr>
+
+          <div class="d-flex justify-content-between mb-4 fs-5 fw-bold text-dark">
+            <span>Total Payable:</span>
+            <span class="text-primary">₹{{ total }}</span>
+          </div>
+
+          {% if user.is_authenticated %}
+            <a href="{% url 'core:checkout' %}" class="btn btn-primary w-100 rounded-pill py-3 fw-bold fs-6">
+              Proceed to Checkout ➔
+            </a>
+          {% else %}
+            <a href="{% url 'accounts:login' %}?next={% url 'core:checkout' %}" class="btn btn-primary w-100 rounded-pill py-3 fw-bold fs-6">
+              Log in to Checkout ➔
+            </a>
+            <p class="text-center small text-muted mt-2 mb-0">You'll be able to enter shipping and payment details.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
+      <div style="font-size: 4rem;">🛒</div>
+      <h3 class="fw-bold mt-3 mb-2">Your Cart is Empty</h3>
+      <p class="text-muted mb-4">Explore our certified doorstep pharmacy and health packages to add products.</p>
+      <div>
+        <a href="{% url 'core:pharmacy_list' %}" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+          Explore Medicines & Health Deals
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

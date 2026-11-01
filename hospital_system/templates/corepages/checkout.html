@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Checkout — Medicare Pharmacy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="mb-4">
+    <h2 class="fw-bold mb-1">Secure Checkout</h2>
+    <p class="text-muted">Enter your doorstep delivery details and choose your preferred payment option.</p>
+  </div>
+
+  <form method="post" id="checkoutForm">
+    {% csrf_token %}
+
+    <div class="row g-4">
+      
+      <!-- Left Column: Delivery & Payment Details -->
+      <div class="col-lg-7">
+        
+        <!-- Shipping Address Card -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+          <h4 class="fw-bold mb-3 border-bottom pb-2">📍 Doorstep Delivery Address</h4>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Full Name <span class="text-danger">*</span></label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}<div class="text-danger small mt-1">{{ form.full_name.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Email Address <span class="text-danger">*</span></label>
+              {{ form.email }}
+              {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Contact Phone <span class="text-danger">*</span></label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Shipping Street Address <span class="text-danger">*</span></label>
+            {{ form.shipping_address }}
+            {% if form.shipping_address.errors %}<div class="text-danger small mt-1">{{ form.shipping_address.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">City <span class="text-danger">*</span></label>
+              {{ form.city }}
+              {% if form.city.errors %}<div class="text-danger small mt-1">{{ form.city.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Postal / Zip Code <span class="text-danger">*</span></label>
+              {{ form.postal_code }}
+              {% if form.postal_code.errors %}<div class="text-danger small mt-1">{{ form.postal_code.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label fw-semibold text-dark">Delivery Instructions (Optional)</label>
+            {{ form.notes }}
+          </div>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+          <h4 class="fw-bold mb-3 border-bottom pb-2">💳 Payment Method</h4>
+
+          <div class="p-3 border rounded-3 mb-3 bg-light">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment_method" id="pay_cod" value="COD" checked>
+              <label class="form-check-label fw-bold text-dark" for="pay_cod">
+                💵 Cash on Delivery (Standard)
+              </label>
+              <div class="small text-muted mt-1">Pay with cash or card upon package arrival at your doorstep.</div>
+            </div>
+          </div>
+
+          <div class="p-3 border rounded-3 bg-light">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="payment_method" id="pay_dev" value="DEV_SANDBOX">
+              <label class="form-check-label fw-bold text-dark" for="pay_dev">
+                🧪 Development Sandbox / Instant Test Mode
+              </label>
+              <div class="small text-muted mt-1">Simulates immediate payment authorization for local testing without real billing charges.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Order Review & Placement -->
+      <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 100px;">
+          <h4 class="fw-bold mb-3 border-bottom pb-2">Order Items ({{ items.count }})</h4>
+
+          <div class="mb-3" style="max-height: 260px; overflow-y: auto;">
+            {% for item in items %}
+              <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                <div>
+                  <div class="fw-semibold text-dark small">{{ item.product.name }}</div>
+                  <div class="small text-muted">₹{{ item.product.effective_price }} &times; {{ item.quantity }}</div>
+                </div>
+                <div class="fw-bold text-dark small">₹{{ item.subtotal }}</div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 text-muted">
+            <span>Subtotal:</span>
+            <span class="text-dark fw-semibold">₹{{ subtotal }}</span>
+          </div>
+
+          <div class="d-flex justify-content-between mb-2 text-muted">
+            <span>Delivery:</span>
+            {% if shipping == 0 %}
+              <span class="text-success fw-bold">FREE</span>
+            {% else %}
+              <span class="text-dark fw-semibold">₹{{ shipping }}</span>
+            {% endif %}
+          </div>
+
+          <hr>
+
+          <div class="d-flex justify-content-between mb-4 fs-5 fw-bold text-dark">
+            <span>Final Total:</span>
+            <span class="text-primary">₹{{ total }}</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold fs-6 shadow-sm">
+            Place Order ➔
+          </button>
+
+          <div class="text-center mt-3">
+            <span class="small text-muted">🔒 256-Bit SSL Encrypted Healthcare Checkout</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+{% endblock %}

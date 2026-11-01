@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Manage Patients — Medicare Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Patient Directory</h2>
+      <p class="text-muted mb-0">Total Registered Patients: <strong>{{ total_patients }}</strong></p>
+    </div>
+    <a href="{% url 'core:admin_dashboard' %}" class="btn btn-outline-secondary rounded-pill px-3">
+      ← Admin Dashboard
+    </a>
+  </div>
+
+  <!-- Search & Filter Card -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <input type="text" name="q" value="{{ query }}" class="form-control rounded-pill px-3" placeholder="Search by name, email, or phone...">
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select rounded-pill px-3">
+          <option value="">All Account Statuses</option>
+          <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active Only</option>
+          <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive Only</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary rounded-pill px-4 flex-grow-1">Filter</button>
+        {% if query or status_filter %}
+          <a href="{% url 'accounts:admin_patient_list' %}" class="btn btn-outline-secondary rounded-pill">Reset</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Patients Table -->
+  <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-4">Patient</th>
+            <th>Contact Details</th>
+            <th>Email Status</th>
+            <th>Account Status</th>
+            <th>Date Joined</th>
+            <th class="text-end pe-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for patient in page_obj %}
+            <tr>
+              <td class="ps-4">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; font-size: 0.9rem;">
+                    {{ patient.first_name|first|default:patient.username|first|upper }}
+                  </div>
+                  <div>
+                    <div class="fw-bold">{{ patient.get_full_name|default:patient.username }}</div>
+                    <div class="small text-muted">@{{ patient.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div>{{ patient.email }}</div>
+                <div class="small text-muted">{{ patient.phone|default:"No phone provided" }}</div>
+              </td>
+              <td>
+                {% if patient.is_email_verified %}
+                  <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1">✓ Verified</span>
+                {% else %}
+                  <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 py-1">Unverified</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if patient.is_active %}
+                  <span class="badge bg-success rounded-pill px-2 py-1">Active</span>
+                {% else %}
+                  <span class="badge bg-danger rounded-pill px-2 py-1">Inactive</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ patient.date_joined|date:"M d, Y" }}</td>
+              <td class="text-end pe-4">
+                <form method="post" action="{% url 'accounts:toggle_user_active' patient.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                  <button type="submit" class="btn btn-sm {% if patient.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} rounded-pill px-3" onclick="return confirm('Are you sure you want to {% if patient.is_active %}deactivate{% else %}activate{% endif %} this patient account?');">
+                    {% if patient.is_active %}Deactivate{% else %}Activate{% endif %}
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <div style="font-size: 2rem;">👤</div>
+                <div class="fw-bold mt-2">No patients found</div>
+                <div class="small">Try adjusting your search criteria or filter.</div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+      <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <span class="small text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        <ul class="pagination pagination-sm m-0">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link rounded-pill me-1" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a></li>
+          {% endif %}
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link rounded-pill" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

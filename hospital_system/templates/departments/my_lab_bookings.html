@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}My Diagnostic Bookings — Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">My Diagnostic Bookings</h2>
+      <p class="text-muted mb-0">Total Bookings: <strong>{{ total_bookings }}</strong></p>
+    </div>
+    <a href="{% url 'departments:lab_test_list' %}" class="btn btn-outline-success rounded-pill px-3">
+      + Book Diagnostic Test
+    </a>
+  </div>
+
+  {% if page_obj.object_list %}
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Test Name</th>
+              <th>Date & Window</th>
+              <th>Collection Type</th>
+              <th>Price Charged</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in page_obj %}
+              <tr>
+                <td class="ps-4">
+                  <div class="fw-bold text-dark">{{ b.test.name }}</div>
+                  <div class="small text-muted">Sample: {{ b.test.sample_type }}</div>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark">{{ b.appointment_date|date:"M d, Y" }}</div>
+                  <div class="small text-muted">{{ b.time_slot }}</div>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border rounded-pill px-2 py-1">
+                    {{ b.get_collection_type_display }}
+                  </span>
+                </td>
+                <td class="fw-bold text-dark">₹{{ b.price_charged }}</td>
+                <td>
+                  {% if b.status == 'PENDING' %}
+                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 py-1">Pending</span>
+                  {% elif b.status == 'CONFIRMED' %}
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1">Confirmed</span>
+                  {% elif b.status == 'COMPLETED' %}
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1">Completed</span>
+                  {% else %}
+                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-1">Cancelled</span>
+                  {% endif %}
+                </td>
+                <td class="text-end pe-4">
+                  {% if b.can_cancel %}
+                    <form method="post" action="{% url 'departments:cancel_lab_booking' b.pk %}" class="d-inline">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Cancel this diagnostic booking?');">
+                        Cancel
+                      </button>
+                    </form>
+                  {% else %}
+                    <span class="text-muted small">&mdash;</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if page_obj.has_other_pages %}
+        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+          <span class="small text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          <ul class="pagination pagination-sm m-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link rounded-pill me-1" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% endif %}
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link rounded-pill" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+
+  {% else %}
+    <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
+      <div style="font-size: 3.5rem;">🧪</div>
+      <h3 class="fw-bold mt-2">No diagnostic bookings found</h3>
+      <p class="text-muted">You haven't scheduled any lab tests or pathology examinations yet.</p>
+      <div>
+        <a href="{% url 'departments:lab_test_list' %}" class="btn btn-success rounded-pill px-4 py-2">
+          Explore Diagnostic Tests
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,47 +1,95 @@
 {% extends 'base.html' %}
-{% block title %}My Availability{% endblock %}
+{% block title %}Manage Consultation Hours — Medicare Doctor Portal{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">My Availability</h2>
-<div class="row">
-  <div class="col-md-5">
-    <div class="card card-hospital p-4">
-      <h5 class="mb-3">Add Time Slot</h5>
-      <form method="post">
-        {% csrf_token %}
-        <div class="mb-3">
-          <label class="form-label">Day of Week</label>
-          {{ form.day_of_week }}
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Start Time</label>
-          {{ form.start_time }}
-        </div>
-        <div class="mb-3">
-          <label class="form-label">End Time</label>
-          {{ form.end_time }}
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Slot Duration (minutes)</label>
-          {{ form.slot_duration_minutes }}
-        </div>
-        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
-        <button type="submit" class="btn btn-primary w-100">Add Slot</button>
-      </form>
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Weekly Consultation Hours</h2>
+      <p class="text-muted mb-0">Define your working days and consultation windows. Patient bookings are strictly restricted to these slots.</p>
     </div>
+    <a href="{% url 'appointments:doctor_appointments' %}" class="btn btn-outline-secondary rounded-pill px-3">
+      ← Schedule Dashboard
+    </a>
   </div>
-  <div class="col-md-7">
-    <div class="card card-hospital p-4">
-      <h5 class="mb-3">Current Slots</h5>
-      <ul class="list-group list-group-flush">
-        {% for slot in slots %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ slot.get_day_of_week_display }}: {{ slot.start_time }} - {{ slot.end_time }} ({{ slot.slot_duration_minutes }} min)
-            <a href="{% url 'doctors:delete_availability' slot.pk %}" class="btn btn-sm btn-outline-danger">Remove</a>
-          </li>
-        {% empty %}
-          <li class="list-group-item text-muted">No availability slots set yet.</li>
-        {% endfor %}
-      </ul>
+
+  <div class="row g-4">
+    <!-- Add Slot Form -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <h4 class="fw-bold mb-3 border-bottom pb-2">⏰ Add New Shift</h4>
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger rounded-3 py-2 small mb-3">
+            {{ form.non_field_errors.0 }}
+          </div>
+        {% endif %}
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Day of Week <span class="text-danger">*</span></label>
+            {{ form.day_of_week }}
+            {% if form.day_of_week.errors %}<div class="text-danger small mt-1">{{ form.day_of_week.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-semibold text-dark">Start Time <span class="text-danger">*</span></label>
+              {{ form.start_time }}
+              {% if form.start_time.errors %}<div class="text-danger small mt-1">{{ form.start_time.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-semibold text-dark">End Time <span class="text-danger">*</span></label>
+              {{ form.end_time }}
+              {% if form.end_time.errors %}<div class="text-danger small mt-1">{{ form.end_time.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-dark">Slot Duration (Minutes)</label>
+            {{ form.slot_duration_minutes }}
+            {% if form.slot_duration_minutes.errors %}<div class="text-danger small mt-1">{{ form.slot_duration_minutes.errors.0 }}</div>{% endif %}
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-semibold">
+            + Save Availability Slot
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Active Schedule List -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <h4 class="fw-bold mb-3 border-bottom pb-2">Current Active Schedule</h4>
+
+        {% if slots %}
+          <div class="list-group list-group-flush">
+            {% for slot in slots %}
+              <div class="list-group-item d-flex align-items-center justify-content-between p-3 border-bottom">
+                <div>
+                  <span class="badge bg-primary rounded-pill px-3 py-1 me-2">{{ slot.get_day_of_week_display }}</span>
+                  <strong class="text-dark">{{ slot.start_time|time:"h:i A" }} &ndash; {{ slot.end_time|time:"h:i A" }}</strong>
+                  <div class="small text-muted mt-1">{{ slot.slot_duration_minutes }} min consultation slots</div>
+                </div>
+                <form method="post" action="{% url 'doctors:delete_availability' slot.pk %}" class="m-0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Remove {{ slot.get_day_of_week_display }} slot?');">
+                    Remove
+                  </button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-5 text-muted">
+            <div style="font-size: 3rem;">⏰</div>
+            <h5 class="fw-bold mt-2">No availability slots set</h5>
+            <p class="small">Add your weekly clinic hours so patients can book appointments with you.</p>
+          </div>
+        {% endif %}
+      </div>
     </div>
   </div>
 </div>

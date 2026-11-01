@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Issue Prescription — Medicare Doctor Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        
+        <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+          <div>
+            <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-1 fw-bold mb-1">
+              DIGITAL PRESCRIPTION
+            </span>
+            <h3 class="fw-bold mb-0">Issue Prescription</h3>
+          </div>
+          <div class="text-end">
+            <div class="fw-bold text-dark">Patient: {{ appointment.patient.get_full_name }}</div>
+            <div class="small text-muted">Dr. {{ appointment.doctor.user.get_full_name }}</div>
+          </div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Diagnosis / Medical Condition <span class="text-danger">*</span></label>
+            {{ form.diagnosis }}
+            {% if form.diagnosis.errors %}<div class="text-danger small mt-1">{{ form.diagnosis.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-dark">General Lifestyle & Dietary Instructions</label>
+            {{ form.instructions }}
+          </div>
+
+          <!-- Prescribed Medicines Formset -->
+          <h5 class="fw-bold mb-3 border-bottom pb-2">💊 Prescribed Medicines</h5>
+          
+          {{ formset.management_form }}
+          <div class="mb-4">
+            {% for item_form in formset %}
+              <div class="p-3 border rounded-3 mb-3 bg-light">
+                <div class="row g-2">
+                  <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Medicine Name</label>
+                    {{ item_form.medicine_name }}
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label small fw-semibold">Dosage</label>
+                    {{ item_form.dosage }}
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Frequency</label>
+                    {{ item_form.frequency }}
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Duration</label>
+                    {{ item_form.duration }}
+                  </div>
+                  <div class="col-12 mt-2">
+                    <label class="form-label small fw-semibold">Instructions (e.g. after food)</label>
+                    {{ item_form.instructions }}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+              Issue Official Prescription ➔
+            </button>
+            <a href="{% url 'appointments:doctor_appointments' %}" class="text-muted small text-decoration-none">
+              Cancel
+            </a>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

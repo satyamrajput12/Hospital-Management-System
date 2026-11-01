@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Edit Doctor - Dr. {{ doctor.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card card-hospital p-4 shadow-sm border-0">
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+          <h3 class="fw-bold mb-1">Edit Doctor Details</h3>
+          <p class="text-muted mb-0">Dr. {{ doctor.user.get_full_name }} ({{ doctor.user.username }})</p>
+        </div>
+        <a href="{% url 'doctors:manage_doctors' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Back to Doctor List
+        </a>
+      </div>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            Please correct the errors below.
+          </div>
+        {% endif %}
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+            {{ form.department }}
+            {% if form.department.errors %}<div class="text-danger small mt-1">{{ form.department.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Specialization <span class="text-danger">*</span></label>
+            {{ form.specialization }}
+            {% if form.specialization.errors %}<div class="text-danger small mt-1">{{ form.specialization.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Qualification <span class="text-danger">*</span></label>
+            {{ form.qualification }}
+            {% if form.qualification.errors %}<div class="text-danger small mt-1">{{ form.qualification.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Experience (yrs) <span class="text-danger">*</span></label>
+            {{ form.experience_years }}
+            {% if form.experience_years.errors %}<div class="text-danger small mt-1">{{ form.experience_years.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Consultation Fee (₹) <span class="text-danger">*</span></label>
+            {{ form.consultation_fee }}
+            {% if form.consultation_fee.errors %}<div class="text-danger small mt-1">{{ form.consultation_fee.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Bio / Professional Background</label>
+          {{ form.bio }}
+          {% if form.bio.errors %}<div class="text-danger small mt-1">{{ form.bio.errors }}</div>{% endif %}
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Profile Photo</label>
+            {{ form.image }}
+            {% if doctor.image %}
+              <div class="mt-2 small text-muted">
+                Current: <a href="{{ doctor.image.url }}" target="_blank">{{ doctor.image.name }}</a>
+              </div>
+            {% endif %}
+            {% if form.image.errors %}<div class="text-danger small mt-1">{{ form.image.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Availability Status</label>
+            <div class="form-check form-switch mt-2">
+              {{ form.is_available }}
+              <label class="form-check-label ms-2" for="{{ form.is_available.id_for_label }}">Accepting Appointments</label>
+            </div>
+            {% if form.is_available.errors %}<div class="text-danger small mt-1">{{ form.is_available.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{% url 'doctors:manage_doctors' %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check2-circle me-1"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

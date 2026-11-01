@@ -36,5 +36,26 @@ class DoctorAvailability(models.Model):
         ordering = ['doctor', 'day_of_week', 'start_time']
         unique_together = ('doctor', 'day_of_week', 'start_time')
 
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        if self.start_time and self.end_time and self.start_time >= self.end_time:
+            raise ValidationError({'end_time': 'End time must be after start time.'})
+
+        if self.doctor_id and self.day_of_week and self.start_time and self.end_time:
+            overlapping = DoctorAvailability.objects.filter(
+                doctor=self.doctor,
+                day_of_week=self.day_of_week,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time,
+            )
+            if self.pk:
+                overlapping = overlapping.exclude(pk=self.pk)
+            if overlapping.exists():
+                raise ValidationError("This availability slot overlaps with an existing slot for this doctor.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.doctor} - {self.get_day_of_week_display()} {self.start_time}-{self.end_time}"
+        return f"{self.doctor} - {self.get_day_of_week_display()} {self.start_time.strftime('%H:%M')}-{self.end_time.strftime('%H:%M')}"

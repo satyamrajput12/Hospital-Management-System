@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Book {{ test.name }} — Medicare Diagnostics{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3 flex-wrap gap-2">
+          <div>
+            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-bold mb-1">
+              {{ test.department.name|default:"Diagnostic Center" }}
+            </span>
+            <h3 class="fw-bold mb-0">Book Diagnostic Test</h3>
+          </div>
+          <div class="text-end">
+            <span class="small text-muted">Test Fee:</span>
+            <div class="fs-4 fw-bold text-success">₹{{ test.effective_price }}</div>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-4 bg-light mb-4">
+          <div class="fw-bold text-dark">{{ test.name }}</div>
+          <div class="small text-muted">Turnaround: {{ test.duration }} &middot; Sample: {{ test.sample_type }}</div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Preferred Date <span class="text-danger">*</span></label>
+              {{ form.appointment_date }}
+              {% if form.appointment_date.errors %}<div class="text-danger small mt-1">{{ form.appointment_date.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Time Slot Window <span class="text-danger">*</span></label>
+              {{ form.time_slot }}
+              {% if form.time_slot.errors %}<div class="text-danger small mt-1">{{ form.time_slot.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Collection Mode <span class="text-danger">*</span></label>
+              {{ form.collection_type }}
+              {% if form.collection_type.errors %}<div class="text-danger small mt-1">{{ form.collection_type.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Contact Phone <span class="text-danger">*</span></label>
+              {{ form.patient_phone }}
+              {% if form.patient_phone.errors %}<div class="text-danger small mt-1">{{ form.patient_phone.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Sample Collection Address</label>
+            {{ form.collection_address }}
+            <div class="form-text small text-muted">Required if choosing Home Sample Collection.</div>
+            {% if form.collection_address.errors %}<div class="text-danger small mt-1">{{ form.collection_address.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-dark">Special Instructions (Optional)</label>
+            {{ form.notes }}
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between pt-2">
+            <button type="submit" class="btn btn-success rounded-pill px-4 py-3 fw-bold">
+              Confirm Test Booking (₹{{ test.effective_price }}) ➔
+            </button>
+            <a href="{% url 'departments:lab_test_detail' test.pk %}" class="text-muted small text-decoration-none">
+              Cancel
+            </a>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

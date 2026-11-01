@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Invoice #{{ billing.invoice_number }} — Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="card border-0 shadow rounded-4 p-4 p-md-5 bg-white">
+        
+        <!-- Header -->
+        <div class="d-flex align-items-center justify-content-between border-bottom pb-4 mb-4">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span style="font-size: 1.8rem;">🏥</span>
+              <h3 class="fw-bold text-primary mb-0">Medicare Hospital Systems</h3>
+            </div>
+            <div class="text-muted small">Billing & Accounts Receivable Division</div>
+            <div class="text-muted small">Tax ID: MED-8849-NY &middot; 24/7 Patient Billing</div>
+          </div>
+          <div class="text-end">
+            <h5 class="fw-bold text-dark mb-0">INVOICE</h5>
+            <div class="fw-semibold text-primary">#{{ billing.invoice_number }}</div>
+            <div class="small text-muted">{{ billing.created_at|date:"F d, Y" }}</div>
+            <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mt-2" onclick="window.print();">
+              🖨️ Print Invoice
+            </button>
+          </div>
+        </div>
+
+        <!-- Billed to / Service Info -->
+        <div class="row g-3 p-3 rounded-4 bg-light mb-4">
+          <div class="col-sm-6">
+            <span class="text-muted small">Billed To (Patient):</span>
+            <div class="fw-bold text-dark fs-5">{{ billing.patient.get_full_name }}</div>
+            <div class="small text-muted">{{ billing.patient.email }}</div>
+            <div class="small text-muted">{{ billing.patient.address|default:"Address on file" }}</div>
+          </div>
+          <div class="col-sm-6 text-sm-end">
+            <span class="text-muted small">Consulting Specialist:</span>
+            <div class="fw-bold text-dark fs-5">Dr. {{ appointment.doctor.user.get_full_name }}</div>
+            <div class="small text-muted">{{ appointment.doctor.specialization }}</div>
+            <div class="small text-muted">Date: {{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"h:i A" }}</div>
+          </div>
+        </div>
+
+        <!-- Breakdown Table -->
+        <div class="table-responsive mb-4">
+          <table class="table table-bordered align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Service Description</th>
+                <th>Department</th>
+                <th class="text-end">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="fw-bold text-dark">Outpatient Specialist Consultation</div>
+                  <div class="small text-muted">Reason: {{ appointment.reason }}</div>
+                </td>
+                <td>{{ appointment.doctor.department.name|default:"General Medicine" }}</td>
+                <td class="text-end fw-semibold">₹{{ billing.consultation_fee }}</td>
+              </tr>
+              <tr>
+                <td colspan="2" class="text-end text-muted">Healthcare Service Surcharge (5%):</td>
+                <td class="text-end">₹{{ billing.tax_amount }}</td>
+              </tr>
+            </tbody>
+            <tfoot class="border-top">
+              <tr>
+                <td colspan="2" class="text-end fw-bold fs-5">Total Payable:</td>
+                <td class="text-end fw-bold fs-5 text-primary">₹{{ billing.total_amount }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Payment Status Details -->
+        <div class="p-3 border rounded-3 d-flex align-items-center justify-content-between mb-4 bg-light">
+          <div>
+            <span class="text-muted small">Payment Mode & Status:</span>
+            <div class="fw-bold text-dark">{{ billing.payment_method }}</div>
+          </div>
+          <div class="text-end">
+            {% if billing.payment_status == 'PAID' %}
+              <span class="badge bg-success rounded-pill px-3 py-2 fs-6">PAID IN FULL</span>
+            {% elif billing.payment_status == 'WAIVED' %}
+              <span class="badge bg-secondary rounded-pill px-3 py-2 fs-6">CANCELLED / WAIVED</span>
+            {% else %}
+              <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6">PENDING AT HOSPITAL</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center pt-3 border-top text-muted small">
+          Thank you for choosing Medicare Healthcare Systems. For billing inquiries, contact billing@medicare.local.
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

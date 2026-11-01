@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}{{ record.title }} — Medical Record | Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        
+        <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3 flex-wrap gap-2">
+          <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-bold mb-1">
+              OFFICIAL CLINICAL RECORD
+            </span>
+            <h3 class="fw-bold mb-0">{{ record.title }}</h3>
+          </div>
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-3" onclick="window.print();">
+            🖨️ Print
+          </button>
+        </div>
+
+        <div class="row g-3 p-3 bg-light rounded-4 mb-4">
+          <div class="col-sm-6">
+            <span class="text-muted small">Patient Name:</span>
+            <div class="fw-bold text-dark">{{ record.patient.get_full_name }}</div>
+            <div class="small text-muted">{{ record.patient.email }}</div>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small">Consulting Physician:</span>
+            <div class="fw-bold text-dark">Dr. {{ record.doctor.user.get_full_name }}</div>
+            <div class="small text-muted">{{ record.doctor.specialization }} ({{ record.doctor.department.name }})</div>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small">Record Date:</span>
+            <div class="text-dark">{{ record.created_at|date:"F d, Y" }}</div>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted small">Status:</span>
+            <div><span class="badge bg-success rounded-pill px-2 py-1">Physician Certified</span></div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark mb-2">Diagnosis:</h5>
+          <div class="p-3 bg-light rounded-3 text-dark">{{ record.diagnosis }}</div>
+        </div>
+
+        {% if record.symptoms %}
+          <div class="mb-4">
+            <h5 class="fw-bold text-dark mb-2">Reported Symptoms:</h5>
+            <p class="text-muted mb-0">{{ record.symptoms }}</p>
+          </div>
+        {% endif %}
+
+        {% if record.treatment_plan %}
+          <div class="mb-4">
+            <h5 class="fw-bold text-dark mb-2">Treatment Plan & Clinical Advice:</h5>
+            <div class="p-3 bg-light rounded-3 text-dark">{{ record.treatment_plan }}</div>
+          </div>
+        {% endif %}
+
+        {% if record.notes %}
+          <div class="mb-4">
+            <h5 class="fw-bold text-dark mb-2">Physician Notes:</h5>
+            <p class="text-muted mb-0">{{ record.notes }}</p>
+          </div>
+        {% endif %}
+
+        {% if record.record_file %}
+          <div class="p-3 border rounded-3 d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center gap-2">
+              <span style="font-size: 1.5rem;">📎</span>
+              <div>
+                <div class="fw-semibold text-dark">Supporting Attachment</div>
+                <div class="small text-muted">Diagnostic lab report or clinical scan</div>
+              </div>
+            </div>
+            <a href="{{ record.record_file.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+              Download File
+            </a>
+          </div>
+        {% endif %}
+
+        <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+          <span class="small text-muted">Medicare Electronic Health Records System &middot; HIPAA Protected</span>
+          <a href="{% url 'appointments:patient_medical_history' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            ← Medical History
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

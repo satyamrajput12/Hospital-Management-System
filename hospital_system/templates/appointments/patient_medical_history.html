@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}My Medical History & Prescriptions — Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">My Medical Records & Prescriptions</h2>
+      <p class="text-muted mb-0">Confidential electronic health history issued by verified Medicare doctors.</p>
+    </div>
+    <a href="{% url 'core:patient_dashboard' %}" class="btn btn-outline-secondary rounded-pill px-3">
+      ← Dashboard
+    </a>
+  </div>
+
+  <div class="row g-4">
+    
+    <!-- 1. Prescriptions Column -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+        <h4 class="fw-bold mb-3 border-bottom pb-2">💊 Issued Prescriptions (Rx)</h4>
+        
+        {% for rx in prescriptions %}
+          <div class="p-3 border rounded-4 mb-3 bg-light">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="badge bg-primary rounded-pill px-2 py-1">Prescription #{{ rx.pk }}</span>
+              <span class="small text-muted">{{ rx.created_at|date:"M d, Y" }}</span>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">{{ rx.diagnosis }}</h6>
+            <div class="small text-muted mb-2">Dr. {{ rx.doctor.user.get_full_name }} ({{ rx.doctor.specialization }})</div>
+            
+            <div class="small text-dark mb-3">
+              <strong>Items:</strong>
+              {% for itm in rx.items.all %}
+                <span class="badge bg-white text-dark border me-1">{{ itm.medicine_name }} ({{ itm.dosage }})</span>
+              {% empty %}
+                <span class="text-muted">General consultation instructions</span>
+              {% endfor %}
+            </div>
+
+            <a href="{% url 'appointments:view_prescription' rx.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+              View & Print Prescription ➔
+            </a>
+          </div>
+        {% empty %}
+          <div class="text-center py-5 text-muted">
+            <div style="font-size: 2.5rem;">💊</div>
+            <div class="fw-bold mt-2">No prescriptions on file</div>
+            <div class="small">Prescriptions written by doctors during visits will appear here.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- 2. Medical Records Column -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+        <h4 class="fw-bold mb-3 border-bottom pb-2">📋 Clinical Records & Diagnoses</h4>
+
+        {% for rec in records %}
+          <div class="p-3 border rounded-4 mb-3 bg-light">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1">Certified Record</span>
+              <span class="small text-muted">{{ rec.created_at|date:"M d, Y" }}</span>
+            </div>
+            <h6 class="fw-bold text-dark mb-1">{{ rec.title }}</h6>
+            <div class="small text-muted mb-2">Dr. {{ rec.doctor.user.get_full_name }}</div>
+            <p class="small text-muted mb-3">{{ rec.diagnosis|truncatewords:15 }}</p>
+
+            <a href="{% url 'appointments:view_medical_record' rec.pk %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+              Read Record ➔
+            </a>
+          </div>
+        {% empty %}
+          <div class="text-center py-5 text-muted">
+            <div style="font-size: 2.5rem;">📋</div>
+            <div class="fw-bold mt-2">No clinical records released yet</div>
+            <div class="small">Consultation summaries and diagnostic notes will be stored here.</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

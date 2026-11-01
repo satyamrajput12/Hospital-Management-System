@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Manage Pharmacy Products - Medicare Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Pharmacy Inventory</h2>
+    <p class="text-muted mb-0">Manage pharmaceutical inventory, stock counts, pricing, and prescription requirements</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'corepages:admin_order_list' %}" class="btn btn-outline-info">
+      <i class="bi bi-box-seam me-1"></i> Patient Orders
+    </a>
+    <a href="{% url 'corepages:admin_product_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle me-1"></i> Add Product
+    </a>
+  </div>
+</div>
+
+<div class="card card-hospital border-0 shadow-sm mb-4">
+  <div class="card-body p-3">
+    <form method="get" class="row g-2">
+      <div class="col-md-6">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search by product name, generic, or manufacturer..." value="{{ query }}">
+          <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Search</button>
+        </div>
+      </div>
+      <div class="col-md-6 text-end">
+        {% if query %}
+          <a href="{% url 'corepages:admin_product_list' %}" class="btn btn-outline-secondary">Clear Search</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card card-hospital border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Prescription</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prod in page_obj %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                {% if prod.image %}
+                  <img src="{{ prod.image.url }}" alt="{{ prod.name }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                {% else %}
+                  <div class="rounded me-2 bg-light d-flex align-items-center justify-content-center border" style="width: 40px; height: 40px;">
+                    <i class="bi bi-capsule text-primary"></i>
+                  </div>
+                {% endif %}
+                <div>
+                  <strong>{{ prod.name }}</strong>
+                  {% if prod.generic_name %}<div class="text-muted small">{{ prod.generic_name }}</div>{% endif %}
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if prod.category %}
+                <span class="badge bg-light text-dark border">{{ prod.category.name }}</span>
+              {% else %}
+                <span class="text-muted small">General</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="fw-bold text-primary">₹{{ prod.effective_price }}</span>
+              {% if prod.discount_price %}
+                <small class="text-muted text-decoration-line-through ms-1">₹{{ prod.price }}</small>
+              {% endif %}
+            </td>
+            <td>
+              {% if prod.stock == 0 %}
+                <span class="badge bg-danger">Out of Stock</span>
+              {% elif prod.stock <= 10 %}
+                <span class="badge bg-warning text-dark">{{ prod.stock }} left (Low)</span>
+              {% else %}
+                <span class="badge bg-success-subtle text-success">{{ prod.stock }} units</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if prod.requires_prescription %}
+                <span class="badge bg-warning-subtle text-dark border"><i class="bi bi-file-earmark-medical me-1"></i> Rx Required</span>
+              {% else %}
+                <span class="badge bg-light text-muted">OTC</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if prod.is_active %}
+                <span class="badge bg-success-subtle text-success">Active</span>
+              {% else %}
+                <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'corepages:admin_product_edit' prod.id %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil-square me-1"></i> Edit
+              </a>
+              <a href="{% url 'core:product_detail' prod.pk %}" target="_blank" class="btn btn-outline-secondary btn-sm ms-1" title="Public View">
+                <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center py-4 text-muted">
+              <i class="bi bi-capsule fs-1 d-block mb-2"></i>
+              No pharmacy products found.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if page_obj.has_other_pages %}
+    <div class="card-footer bg-white border-0 py-3">
+      <nav>
+        <ul class="pagination justify-content-center mb-0">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a></li>
+          {% endif %}
+          <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

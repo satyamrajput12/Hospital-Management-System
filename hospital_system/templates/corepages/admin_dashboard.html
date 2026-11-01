@@ -1,62 +1,233 @@
 {% extends 'base.html' %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Hospital Administration Dashboard - Medicare{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">Admin Dashboard</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Hospital Administration Dashboard</h2>
+    <p class="text-muted mb-0">System-wide operational metrics, clinical activities, and commerce analytics</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'doctors:add_doctor' %}" class="btn btn-outline-primary btn-sm">
+      <i class="bi bi-person-plus me-1"></i> Add Doctor
+    </a>
+    <a href="{% url 'departments:admin_dept_create' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-building-add me-1"></i> Add Department
+    </a>
+  </div>
+</div>
+
+<!-- Stats Metric Grid -->
 <div class="row g-3 mb-4">
-  <div class="col-md-3">
-    <div class="stat-card" style="background-color:#0f766e;">
-      <div class="small">Doctors</div>
-      <div class="fs-3 fw-bold">{{ stats.total_doctors }}</div>
+  <div class="col-md-3 col-sm-6">
+    <div class="card border-0 shadow-sm rounded-4 p-3" style="background: linear-gradient(135deg, #0f766e, #14b8a6); color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-uppercase small fw-bold opacity-75">Doctors</div>
+          <div class="fs-2 fw-bold mt-1">{{ stats.total_doctors }}</div>
+        </div>
+        <div class="bg-white bg-opacity-25 rounded-circle p-3">
+          <i class="bi bi-hospital fs-4"></i>
+        </div>
+      </div>
+      <a href="{% url 'doctors:manage_doctors' %}" class="text-white text-decoration-none small mt-2 d-inline-block opacity-90">
+        Manage Staff <i class="bi bi-arrow-right"></i>
+      </a>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="stat-card" style="background-color:#2563eb;">
-      <div class="small">Departments</div>
-      <div class="fs-3 fw-bold">{{ stats.total_departments }}</div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="card border-0 shadow-sm rounded-4 p-3" style="background: linear-gradient(135deg, #2563eb, #3b82f6); color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-uppercase small fw-bold opacity-75">Registered Patients</div>
+          <div class="fs-2 fw-bold mt-1">{{ stats.total_patients }}</div>
+        </div>
+        <div class="bg-white bg-opacity-25 rounded-circle p-3">
+          <i class="bi bi-people fs-4"></i>
+        </div>
+      </div>
+      <a href="{% url 'accounts:admin_patient_list' %}" class="text-white text-decoration-none small mt-2 d-inline-block opacity-90">
+        Patient Directory <i class="bi bi-arrow-right"></i>
+      </a>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="stat-card" style="background-color:#f59e0b;">
-      <div class="small">Total Appointments</div>
-      <div class="fs-3 fw-bold">{{ stats.total_appointments }}</div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="card border-0 shadow-sm rounded-4 p-3" style="background: linear-gradient(135deg, #d97706, #f59e0b); color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-uppercase small fw-bold opacity-75">Appointments</div>
+          <div class="fs-2 fw-bold mt-1">{{ stats.total_appointments }}</div>
+          <small class="opacity-90">({{ stats.pending_appointments }} pending)</small>
+        </div>
+        <div class="bg-white bg-opacity-25 rounded-circle p-3">
+          <i class="bi bi-calendar-event fs-4"></i>
+        </div>
+      </div>
+      <a href="{% url 'appointments:all_appointments' %}" class="text-white text-decoration-none small mt-2 d-inline-block opacity-90">
+        Review Schedule <i class="bi bi-arrow-right"></i>
+      </a>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="stat-card" style="background-color:#dc2626;">
-      <div class="small">Pending Appointments</div>
-      <div class="fs-3 fw-bold">{{ stats.pending_appointments }}</div>
+
+  <div class="col-md-3 col-sm-6">
+    <div class="card border-0 shadow-sm rounded-4 p-3" style="background: linear-gradient(135deg, #059669, #10b981); color: white;">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="text-uppercase small fw-bold opacity-75">Pharmacy Revenue</div>
+          <div class="fs-2 fw-bold mt-1">₹{{ stats.total_revenue|floatformat:0 }}</div>
+          <small class="opacity-90">({{ stats.total_orders }} orders)</small>
+        </div>
+        <div class="bg-white bg-opacity-25 rounded-circle p-3">
+          <i class="bi bi-cash-stack fs-4"></i>
+        </div>
+      </div>
+      <a href="{% url 'corepages:admin_order_list' %}" class="text-white text-decoration-none small mt-2 d-inline-block opacity-90">
+        Order Ledgers <i class="bi bi-arrow-right"></i>
+      </a>
     </div>
   </div>
 </div>
 
+<!-- Administration Quick Navigation Hub -->
 <div class="row g-3 mb-4">
-  <div class="col-md-4">
-    <a href="{% url 'doctors:manage_list' %}" class="btn btn-outline-primary w-100 py-3">Manage Doctors</a>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'doctors:manage_doctors' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-primary fs-3 mb-2"><i class="bi bi-person-badge"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Doctors & Staff</h6>
+      <span class="text-muted small">Manage accounts & status</span>
+    </a>
   </div>
-  <div class="col-md-4">
-    <a href="/admin/departments/department/" class="btn btn-outline-primary w-100 py-3">Manage Departments</a>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'accounts:admin_patient_list' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-info fs-3 mb-2"><i class="bi bi-person-lines-fill"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Patients Directory</h6>
+      <span class="text-muted small">View & toggle active status</span>
+    </a>
   </div>
-  <div class="col-md-4">
-    <a href="{% url 'appointments:all_appointments' %}" class="btn btn-outline-primary w-100 py-3">All Appointments</a>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'departments:admin_dept_list' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-success fs-3 mb-2"><i class="bi bi-building"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Departments</h6>
+      <span class="text-muted small">Manage specialty units</span>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'departments:admin_test_list' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-purple fs-3 mb-2" style="color: #8b5cf6;"><i class="bi bi-activity"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Diagnostic Lab</h6>
+      <span class="text-muted small">Tests ({{ stats.total_lab_bookings }} bookings)</span>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'corepages:admin_product_list' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-warning fs-3 mb-2"><i class="bi bi-capsule"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Pharmacy Catalog</h6>
+      <span class="text-muted small">Stock & medicine items</span>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'corepages:admin_order_list' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-secondary fs-3 mb-2"><i class="bi bi-bag-check"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Customer Orders</h6>
+      <span class="text-muted small">Order fulfillment status</span>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'appointments:all_appointments' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-danger fs-3 mb-2"><i class="bi bi-calendar-range"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">All Appointments</h6>
+      <span class="text-muted small">Hospital appointment ledger</span>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="/admin/" target="_blank" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-dark fs-3 mb-2"><i class="bi bi-sliders"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Django Admin</h6>
+      <span class="text-muted small">Raw ORM database portal</span>
+    </a>
   </div>
 </div>
 
-<div class="card card-hospital p-4">
-  <h5 class="mb-3">Recent Appointments</h5>
-  <table class="table">
-    <thead><tr><th>Patient</th><th>Doctor</th><th>Date</th><th>Status</th></tr></thead>
-    <tbody>
-      {% for appt in recent_appointments %}
-        <tr>
-          <td>{{ appt.patient.get_full_name|default:appt.patient.username }}</td>
-          <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
-          <td>{{ appt.appointment_date }}</td>
-          <td><span class="badge badge-status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="4" class="text-muted text-center py-3">No appointments yet.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="row g-4">
+  <!-- Recent Consultations Table -->
+  <div class="col-lg-7">
+    <div class="card card-hospital p-4 border-0 shadow-sm h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Recent Doctor Appointments</h5>
+        <a href="{% url 'appointments:all_appointments' %}" class="btn btn-sm btn-link text-decoration-none">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Date & Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for appt in recent_appointments %}
+              <tr>
+                <td>
+                  <strong>{{ appt.patient.get_full_name|default:appt.patient.username }}</strong>
+                </td>
+                <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
+                <td>
+                  <div>{{ appt.appointment_date|date:"M d, Y" }}</div>
+                  <div class="text-muted small">{{ appt.appointment_time|time:"H:i" }}</div>
+                </td>
+                <td><span class="badge badge-status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="text-muted text-center py-4">No appointments recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Pharmacy Orders Table -->
+  <div class="col-lg-5">
+    <div class="card card-hospital p-4 border-0 shadow-sm h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Recent Pharmacy Orders</h5>
+        <a href="{% url 'corepages:admin_order_list' %}" class="btn btn-sm btn-link text-decoration-none">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Order</th>
+              <th>Recipient</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ord in recent_orders %}
+              <tr>
+                <td><code>{{ ord.order_number }}</code></td>
+                <td>
+                  <span class="small fw-semibold">{{ ord.full_name }}</span>
+                </td>
+                <td><strong class="text-success">₹{{ ord.total_amount }}</strong></td>
+                <td>
+                  <span class="badge {% if ord.status == 'DELIVERED' %}bg-success{% elif ord.status == 'CANCELLED' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                    {{ ord.get_status_display }}
+                  </span>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="4" class="text-muted text-center py-4">No pharmacy orders yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Manage Order {{ order.order_number }} - Medicare Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card card-hospital p-4 shadow-sm border-0">
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+          <h3 class="fw-bold mb-1">Manage Order {{ order.order_number }}</h3>
+          <p class="text-muted mb-0">Customer: {{ order.full_name }} ({{ order.email }})</p>
+        </div>
+        <a href="{% url 'corepages:admin_order_list' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Orders List
+        </a>
+      </div>
+
+      <div class="row mb-4 g-3">
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded">
+            <h6 class="fw-bold text-muted mb-2">Delivery Details</h6>
+            <p class="mb-1"><strong>Recipient:</strong> {{ order.full_name }}</p>
+            <p class="mb-1"><strong>Phone:</strong> {{ order.phone }}</p>
+            <p class="mb-0"><strong>Address:</strong> {{ order.shipping_address }}, {{ order.city }} - {{ order.postal_code }}</p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 bg-light rounded">
+            <h6 class="fw-bold text-muted mb-2">Order Summary</h6>
+            <p class="mb-1"><strong>Placed:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+            <p class="mb-1"><strong>Payment:</strong> {{ order.get_payment_method_display }} ({{ order.get_payment_status_display }})</p>
+            <p class="mb-0"><strong>Total Amount:</strong> <span class="fw-bold text-success fs-5">₹{{ order.total_amount }}</span></p>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="fw-bold mb-2">Order Line Items</h6>
+      <div class="table-responsive mb-4">
+        <table class="table table-sm table-bordered">
+          <thead class="table-light">
+            <tr>
+              <th>Item</th>
+              <th class="text-center">Quantity</th>
+              <th class="text-end">Unit Price</th>
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in order.items.all %}
+              <tr>
+                <td>{{ item.product.name }}</td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td class="text-end">₹{{ item.unit_price }}</td>
+                <td class="text-end fw-semibold">₹{{ item.subtotal }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            Please correct the errors below.
+          </div>
+        {% endif %}
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Order Fulfillment Status <span class="text-danger">*</span></label>
+            {{ form.status }}
+            {% if form.status.errors %}<div class="text-danger small mt-1">{{ form.status.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Payment Status <span class="text-danger">*</span></label>
+            {{ form.payment_status }}
+            {% if form.payment_status.errors %}<div class="text-danger small mt-1">{{ form.payment_status.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{% url 'corepages:admin_order_list' %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check2-circle me-1"></i> Update Order
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

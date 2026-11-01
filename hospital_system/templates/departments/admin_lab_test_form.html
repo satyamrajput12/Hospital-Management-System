@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - Medicare Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card card-hospital p-4 shadow-sm border-0">
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+          <h3 class="fw-bold mb-1">{{ title }}</h3>
+          <p class="text-muted mb-0">Diagnostic test specification and instructions</p>
+        </div>
+        <a href="{% url 'departments:admin_test_list' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Tests List
+        </a>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            Please correct the errors in the form below.
+          </div>
+        {% endif %}
+
+        <div class="row mb-3">
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Test Name <span class="text-danger">*</span></label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Test Code</label>
+            {{ form.code }}
+            {% if form.code.errors %}<div class="text-danger small mt-1">{{ form.code.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Department</label>
+            {{ form.department }}
+            {% if form.department.errors %}<div class="text-danger small mt-1">{{ form.department.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">URL Slug</label>
+            {{ form.slug }}
+            <small class="form-text text-muted">Leave blank to auto-slugify</small>
+            {% if form.slug.errors %}<div class="text-danger small mt-1">{{ form.slug.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Standard Price (₹) <span class="text-danger">*</span></label>
+            {{ form.price }}
+            {% if form.price.errors %}<div class="text-danger small mt-1">{{ form.price.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Discounted Price (₹)</label>
+            {{ form.discount_price }}
+            <small class="form-text text-muted">Optional promo rate</small>
+            {% if form.discount_price.errors %}<div class="text-danger small mt-1">{{ form.discount_price.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Duration (Hours) <span class="text-danger">*</span></label>
+            {{ form.duration_hours }}
+            {% if form.duration_hours.errors %}<div class="text-danger small mt-1">{{ form.duration_hours.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+          {{ form.description }}
+          {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Preparation Instructions for Patient</label>
+          {{ form.preparation_instructions }}
+          <small class="form-text text-muted">e.g., 10-12 hours overnight fasting required, drink plenty of water.</small>
+          {% if form.preparation_instructions.errors %}<div class="text-danger small mt-1">{{ form.preparation_instructions.errors }}</div>{% endif %}
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="form-check form-switch mt-2">
+              {{ form.fasting_required }}
+              <label class="form-check-label ms-2" for="{{ form.fasting_required.id_for_label }}">Fasting Required</label>
+            </div>
+            {% if form.fasting_required.errors %}<div class="text-danger small mt-1">{{ form.fasting_required.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <div class="form-check form-switch mt-2">
+              {{ form.is_active }}
+              <label class="form-check-label ms-2" for="{{ form.is_active.id_for_label }}">Active for Public Booking</label>
+            </div>
+            {% if form.is_active.errors %}<div class="text-danger small mt-1">{{ form.is_active.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{% url 'departments:admin_test_list' %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check2-circle me-1"></i> Save Test
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

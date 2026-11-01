@@ -25,8 +25,14 @@ urlpatterns = [
     path('departments/', include('departments.urls')),
     path('doctors/', include('doctors.urls')),
     path('appointments/', include('appointments.urls')),
-    path('', include('corepages.urls')),
+    path('', include(('corepages.urls', 'core'), namespace='core')),
+    path('', include(('corepages.urls', 'corepages'), namespace='corepages')),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+handler400 = 'corepages.views.custom_bad_request_view'
+handler403 = 'corepages.views.custom_permission_denied_view'
+handler404 = 'corepages.views.custom_page_not_found_view'
+handler500 = 'corepages.views.custom_server_error_view'

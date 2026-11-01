@@ -1,44 +1,228 @@
 {% extends 'base.html' %}
-{% block title %}Patient Dashboard{% endblock %}
+{% block title %}Patient Portal - Medicare Healthcare{% endblock %}
+
 {% block content %}
-<h2 class="mb-4">Welcome, {{ user.first_name|default:user.username }} 👋</h2>
-<div class="row g-3 mb-4">
-  <div class="col-md-4">
-    <div class="stat-card" style="background-color:#0f766e;">
-      <div class="small">Upcoming Appointments</div>
-      <div class="fs-3 fw-bold">{{ upcoming_count }}</div>
-    </div>
+<!-- Welcome & Verification Banner -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+  <div>
+    <h2 class="fw-bold mb-1">Welcome, {{ user.first_name|default:user.username }} 👋</h2>
+    <p class="text-muted mb-0">Your personal Medicare health portal and medical summary</p>
   </div>
-  <div class="col-md-4">
-    <div class="stat-card" style="background-color:#2563eb;">
-      <div class="small">Find a Doctor</div>
-      <a href="{% url 'doctors:list' %}" class="btn btn-light btn-sm mt-2">Browse Doctors</a>
-    </div>
-  </div>
-  <div class="col-md-4">
-    <div class="stat-card" style="background-color:#f59e0b;">
-      <div class="small">My Appointments</div>
-      <a href="{% url 'appointments:my_appointments' %}" class="btn btn-light btn-sm mt-2">View All</a>
-    </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'doctors:doctor_list' %}" class="btn btn-primary">
+      <i class="bi bi-calendar-plus me-1"></i> Book Appointment
+    </a>
+    <a href="{% url 'appointments:patient_medical_history' %}" class="btn btn-outline-info">
+      <i class="bi bi-file-earmark-medical me-1"></i> Medical Records & Rx
+    </a>
   </div>
 </div>
 
-<div class="card card-hospital p-4">
-  <h5 class="mb-3">Recent Appointments</h5>
-  <table class="table">
-    <thead><tr><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
-    <tbody>
-      {% for appt in appointments %}
-        <tr>
-          <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
-          <td>{{ appt.appointment_date }}</td>
-          <td>{{ appt.appointment_time }}</td>
-          <td><span class="badge badge-status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="4" class="text-muted text-center py-3">No appointments yet.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+{% if not user.is_email_verified %}
+  <div class="alert alert-warning border-0 shadow-sm d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
+      <div>
+        <strong>Email verification required!</strong>
+        <div class="small">Please verify your email address ({{ user.email }}) to ensure full account access.</div>
+      </div>
+    </div>
+    <form method="post" action="{% url 'accounts:resend_verification' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-outline-dark">Resend Link</button>
+    </form>
+  </div>
+{% endif %}
+
+<!-- Quick Access Services -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <a href="{% url 'doctors:doctor_list' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-primary fs-2 mb-2"><i class="bi bi-person-heart"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Find Doctors</h6>
+      <span class="text-muted small">Specialists & bookings</span>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'departments:lab_test_list' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-info fs-2 mb-2"><i class="bi bi-virus"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Diagnostic Tests</h6>
+      <span class="text-muted small">Home collection & labs</span>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'corepages:pharmacy_list' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-success fs-2 mb-2"><i class="bi bi-capsule"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Online Pharmacy</h6>
+      <span class="text-muted small">Meds & healthcare</span>
+    </a>
+  </div>
+  <div class="col-md-3 col-6">
+    <a href="{% url 'appointments:patient_medical_history' %}" class="card card-hospital p-3 text-center text-decoration-none h-100 border-0 shadow-sm hover-elevate">
+      <div class="text-purple fs-2 mb-2" style="color: #8b5cf6;"><i class="bi bi-receipt-cutoff"></i></div>
+      <h6 class="fw-bold mb-1 text-dark">Prescriptions</h6>
+      <span class="text-muted small">Doctor clinical notes</span>
+    </a>
+  </div>
+</div>
+
+<!-- Upcoming Consultations Section -->
+<div class="card card-hospital p-4 border-0 shadow-sm mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0"><i class="bi bi-calendar-check text-primary me-2"></i>Upcoming Consultations</h5>
+    <a href="{% url 'appointments:my_appointments' %}" class="btn btn-sm btn-link text-decoration-none">Full Appointment History &rarr;</a>
+  </div>
+
+  {% if upcoming_appointments %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Doctor</th>
+            <th>Department</th>
+            <th>Date & Time</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for appt in upcoming_appointments %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  {% if appt.doctor.image %}
+                    <img src="{{ appt.doctor.image.url }}" alt="Doctor" class="rounded-circle me-2" style="width: 38px; height: 38px; object-fit: cover;">
+                  {% else %}
+                    <div class="rounded-circle me-2 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                      <i class="bi bi-person-fill"></i>
+                    </div>
+                  {% endif %}
+                  <div>
+                    <strong>Dr. {{ appt.doctor.user.get_full_name }}</strong>
+                    <div class="text-muted small">{{ appt.doctor.specialization }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>{{ appt.doctor.department.name }}</td>
+              <td>
+                <div><i class="bi bi-calendar3 me-1 text-muted"></i>{{ appt.appointment_date|date:"D, M d, Y" }}</div>
+                <div class="text-muted small"><i class="bi bi-clock me-1"></i>{{ appt.appointment_time|time:"H:i" }}</div>
+              </td>
+              <td>
+                <span class="badge badge-status-{{ appt.status }}">{{ appt.get_status_display }}</span>
+              </td>
+              <td class="text-end">
+                <div class="btn-group btn-group-sm">
+                  <a href="{% url 'appointments:view_invoice' appt.id %}" class="btn btn-outline-secondary" title="View Bill">
+                    <i class="bi bi-receipt"></i>
+                  </a>
+                  {% if appt.can_reschedule %}
+                    <a href="{% url 'appointments:reschedule_appointment' appt.id %}" class="btn btn-outline-primary" title="Reschedule">
+                      <i class="bi bi-calendar2-range"></i>
+                    </a>
+                  {% endif %}
+                  {% if appt.can_cancel %}
+                    <form method="post" action="{% url 'appointments:cancel_appointment' appt.id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline-danger" title="Cancel">
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="text-center py-4 text-muted">
+      <i class="bi bi-calendar-heart fs-1 d-block mb-2 text-primary opacity-50"></i>
+      <p class="mb-2">You have no upcoming appointments scheduled.</p>
+      <a href="{% url 'doctors:doctor_list' %}" class="btn btn-outline-primary btn-sm">Find a Specialist</a>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Secondary Activities: Lab Bookings and Pharmacy Orders -->
+<div class="row g-4">
+  <!-- Diagnostic Bookings -->
+  <div class="col-lg-6">
+    <div class="card card-hospital p-4 border-0 shadow-sm h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0"><i class="bi bi-droplet-half text-danger me-2"></i>Recent Lab Bookings</h5>
+        <a href="{% url 'departments:my_lab_bookings' %}" class="btn btn-sm btn-link text-decoration-none">View All &rarr;</a>
+      </div>
+      {% if recent_lab_bookings %}
+        <div class="list-group list-group-flush">
+          {% for booking in recent_lab_bookings %}
+            <div class="list-group-item px-0 py-2 border-bottom">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ booking.lab_test.name }}</strong>
+                  <div class="text-muted small">
+                    <i class="bi bi-calendar3 me-1"></i>{{ booking.booking_date|date:"M d, Y" }} &bull;
+                    {% if booking.home_collection %}Home Collection{% else %}In-Clinic{% endif %}
+                  </div>
+                </div>
+                <div class="text-end">
+                  <span class="badge {% if booking.status == 'COMPLETED' %}bg-success{% elif booking.status == 'CANCELLED' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                    {{ booking.get_status_display }}
+                  </span>
+                  <div class="fw-bold text-primary small mt-1">₹{{ booking.price_at_booking }}</div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-4 text-muted">
+          <p class="mb-2">No diagnostic lab bookings yet.</p>
+          <a href="{% url 'departments:lab_test_list' %}" class="btn btn-outline-secondary btn-sm">Book Lab Test</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Pharmacy Orders -->
+  <div class="col-lg-6">
+    <div class="card card-hospital p-4 border-0 shadow-sm h-100">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0"><i class="bi bi-bag-check text-success me-2"></i>Recent Pharmacy Orders</h5>
+        <a href="{% url 'corepages:my_orders' %}" class="btn btn-sm btn-link text-decoration-none">View Orders &rarr;</a>
+      </div>
+      {% if recent_orders %}
+        <div class="list-group list-group-flush">
+          {% for order in recent_orders %}
+            <div class="list-group-item px-0 py-2 border-bottom">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <code>{{ order.order_number }}</code>
+                  <div class="text-muted small">
+                    {{ order.created_at|date:"M d, Y" }} &bull; {{ order.items.count }} item{{ order.items.count|pluralize }}
+                  </div>
+                </div>
+                <div class="text-end">
+                  <span class="badge {% if order.status == 'DELIVERED' %}bg-success{% elif order.status == 'CANCELLED' %}bg-danger{% else %}bg-primary{% endif %}">
+                    {{ order.get_status_display }}
+                  </span>
+                  <div class="fw-bold text-success small mt-1">₹{{ order.total_amount }}</div>
+                </div>
+              </div>
+              <div class="text-end mt-1">
+                <a href="{% url 'corepages:order_detail' order.id %}" class="btn btn-link btn-sm p-0 text-decoration-none">Order Details &rarr;</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-4 text-muted">
+          <p class="mb-2">No pharmacy orders placed yet.</p>
+          <a href="{% url 'corepages:pharmacy_list' %}" class="btn btn-outline-secondary btn-sm">Visit Pharmacy</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

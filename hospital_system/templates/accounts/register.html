@@ -1,67 +1,1006 @@
-{% extends 'base.html' %}
-{% block title %}Register | City Care Hospital{% endblock %}
-{% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-7">
-    <div class="card card-hospital p-4">
-      <h3 class="mb-3 text-center">Create Patient Account</h3>
-      <form method="post">
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-        {% endif %}
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">First Name</label>
-            {{ form.first_name }}
-            {{ form.first_name.errors }}
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Last Name</label>
-            {{ form.last_name }}
-            {{ form.last_name.errors }}
-          </div>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Registration | Medicare Multi-Speciality Hospital</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --navy-900: #0a1329;
+      --navy-800: #0f1e3d;
+      --navy-700: #1e293b;
+      --emergency-red: #ef4444;
+      --emergency-red-dark: #dc2626;
+      --emergency-red-bg: #fef2f2;
+      --emerald-600: #059669;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --radius-lg: 24px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #091326 0%, #0d213f 50%, #102a4e 100%);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Medical Background Elements */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ambient-circle-1 {
+      position: absolute;
+      top: -10%;
+      left: -5%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(2, 132, 199, 0.22) 0%, transparent 70%);
+      filter: blur(50px);
+    }
+
+    .ambient-circle-2 {
+      position: absolute;
+      bottom: -15%;
+      right: -5%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(5, 150, 105, 0.18) 0%, transparent 70%);
+      filter: blur(60px);
+    }
+
+    .ambient-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* TOP EMERGENCY & AMBULANCE HEADER */
+    .emergency-topbar {
+      position: relative;
+      z-index: 20;
+      background: rgba(10, 19, 41, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 0;
+    }
+
+    .emergency-pulse-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fecaca;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 50px;
+    }
+
+    .siren-dot {
+      width: 10px;
+      height: 10px;
+      background-color: var(--emergency-red);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--emergency-red);
+      animation: sirenBlink 0.9s infinite alternate;
+    }
+
+    @keyframes sirenBlink {
+      0% { opacity: 0.3; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1.25); filter: drop-shadow(0 0 8px #ef4444); }
+    }
+
+    .ambulance-dial {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 800;
+      background: var(--emergency-red-dark);
+      padding: 4px 12px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ambulance-dial:hover {
+      background: #b91c1c;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+    }
+
+    .topbar-info {
+      color: #94a3b8;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .back-home-link:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      transform: translateX(-3px);
+    }
+
+    /* MAIN CONTAINER */
+    .register-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 36px 16px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .register-card {
+      width: 100%;
+      max-width: 1160px;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      display: flex;
+      overflow: hidden;
+      min-height: 720px;
+    }
+
+    /* LEFT HERO: MEDICAL TEAM & PATIENT BENEFITS */
+    .register-hero {
+      flex: 1;
+      background: linear-gradient(180deg, rgba(8, 24, 48, 0.84) 0%, rgba(9, 19, 39, 0.95) 100%),
+                  url("{% static 'images/hospital_care_team.jpg' %}") center/cover no-repeat;
+      position: relative;
+      padding: 44px 38px;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .hero-top-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(5, 150, 105, 0.25);
+      border: 1px solid rgba(5, 150, 105, 0.5);
+      padding: 7px 16px;
+      border-radius: 50px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #6ee7b7;
+      backdrop-filter: blur(8px);
+      width: fit-content;
+    }
+
+    .hero-content {
+      margin-top: auto;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* Benefits List */
+    .benefits-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .benefit-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .benefit-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+
+    .benefit-text strong {
+      display: block;
+      font-size: 13.5px;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .benefit-text span {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    /* AMBULANCE HIGHLIGHT STRIP IN HERO */
+    .ambulance-hero-strip {
+      background: rgba(220, 38, 38, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ambulance-hero-strip .siren-box {
+      font-size: 22px;
+      color: #f87171;
+    }
+
+    .ambulance-hero-strip .strip-text {
+      font-size: 12px;
+      color: #fecaca;
+    }
+
+    .ambulance-hero-strip strong {
+      color: #ffffff;
+      display: block;
+      font-size: 13px;
+    }
+
+    /* RIGHT SIDE: REGISTRATION FORM */
+    .register-form-side {
+      flex: 1.25;
+      padding: 40px 42px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    .portal-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      text-decoration: none;
+    }
+
+    .brand-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7 0%, #059669 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 22px;
+      box-shadow: 0 8px 18px rgba(2, 132, 199, 0.3);
+    }
+
+    .brand-text h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--navy-900);
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .form-heading {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy-900);
+      margin-bottom: 4px;
+    }
+
+    .form-desc {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    /* FORM STYLES */
+    .form-group-custom {
+      margin-bottom: 14px;
+    }
+
+    .form-label-custom {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--navy-700);
+      margin-bottom: 5px;
+    }
+
+    .form-label-custom .badge-info-tag {
+      font-size: 10px;
+      font-weight: 600;
+      background: #eff6ff;
+      color: #2563eb;
+      padding: 2px 7px;
+      border-radius: 6px;
+      margin-left: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: #94a3b8;
+      font-size: 15px;
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .form-control-custom {
+      width: 100%;
+      height: 44px;
+      padding: 8px 38px 8px 40px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 11px;
+      font-size: 13.5px;
+      color: var(--text-main);
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .form-control-custom:focus {
+      background: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      outline: none;
+    }
+
+    .form-control-custom:focus ~ .input-icon {
+      color: var(--primary);
+    }
+
+    .pw-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+    }
+
+    .pw-toggle-btn:hover {
+      color: var(--navy-900);
+    }
+
+    .field-error-msg {
+      color: #dc2626;
+      font-size: 11.5px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600;
+    }
+
+    /* TERMS & DISCLAIMER */
+    .terms-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin: 16px 0;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .terms-box i {
+      color: var(--primary);
+      font-size: 16px;
+      margin-top: 1px;
+    }
+
+    /* SUBMIT BUTTON */
+    .btn-register-submit {
+      width: 100%;
+      height: 48px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7 0%, #059669 100%);
+      color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 22px rgba(2, 132, 199, 0.3);
+      transition: all 0.25s ease;
+    }
+
+    .btn-register-submit:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #047857 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(2, 132, 199, 0.4);
+    }
+
+    .btn-register-submit:active {
+      transform: translateY(0);
+    }
+
+    /* FOOTER */
+    .register-footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .register-footer a {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .register-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 991px) {
+      .register-card {
+        flex-direction: column;
+        max-width: 620px;
+      }
+
+      .register-hero {
+        padding: 30px 24px;
+        min-height: 360px;
+      }
+
+      .register-form-side {
+        padding: 32px 24px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .topbar-info {
+        display: none;
+      }
+      .register-card {
+        border-radius: 18px;
+      }
+      .hero-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background glow elements -->
+  <div class="ambient-bg">
+    <div class="ambient-circle-1"></div>
+    <div class="ambient-circle-2"></div>
+    <div class="ambient-grid"></div>
+  </div>
+
+  <!-- TOP EMERGENCY AMBULANCE BAR -->
+  <div class="emergency-topbar">
+    <div class="container-fluid px-3 px-md-4 d-flex align-items-center justify-content-between">
+      
+      <!-- Left: 24x7 Ambulance SOS -->
+      <div class="d-flex align-items-center gap-2 gap-md-3">
+        <div class="emergency-pulse-badge">
+          <span class="siren-dot"></span>
+          <span>24/7 AMBULANCE</span>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Username</label>
-          {{ form.username }}
-          {{ form.username.errors }}
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          {{ form.email }}
-          {{ form.email.errors }}
-        </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Phone</label>
-            {{ form.phone }}
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Date of Birth</label>
-            {{ form.date_of_birth }}
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Address</label>
-          {{ form.address }}
-        </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Password</label>
-            {{ form.password1 }}
-            {{ form.password1.errors }}
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Confirm Password</label>
-            {{ form.password2 }}
-            {{ form.password2.errors }}
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Register</button>
-      </form>
-      <p class="text-center mt-3 mb-0 small">Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
+        <a href="tel:108" class="ambulance-dial">
+          <i class="bi bi-telephone-fill"></i> DIAL 108 / 102
+        </a>
+      </div>
+
+      <!-- Center: Emergency Fleet Status -->
+      <div class="topbar-info">
+        <span><i class="bi bi-hospital text-info me-1"></i> Medicare Multi-Speciality Hospital</span>
+        <span><i class="bi bi-shield-check text-success me-1"></i> Free Digital Registration</span>
+        <span><i class="bi bi-telephone text-warning me-1"></i> Helpline: 1800-419-1100</span>
+      </div>
+
+      <!-- Right: Back to Home -->
+      <div>
+        <a href="{% url 'core:home' %}" class="back-home-link">
+          <i class="bi bi-arrow-left"></i>
+          <span>Back to Home</span>
+        </a>
+      </div>
+
     </div>
   </div>
-</div>
-{% endblock %}
+
+  <!-- MAIN REGISTRATION CONTAINER -->
+  <main class="register-main">
+    <div class="register-card">
+
+      <!-- LEFT SIDE: HOSPITAL HEALTHCARE & BENEFITS HERO -->
+      <div class="register-hero">
+
+        <div class="hero-top-badge">
+          <i class="bi bi-heart-pulse-fill"></i>
+          <span>PATIENT HEALTHCARE NETWORK • FREE ENROLLMENT</span>
+        </div>
+
+        <div class="hero-content">
+          <h1 class="hero-title">
+            Your Health Journey, <span>Fully Connected</span>
+          </h1>
+          <p class="hero-subtitle">
+            Register as a verified patient to unlock instant appointment booking, digital prescriptions, home pathology, and rapid emergency ambulance response.
+          </p>
+
+          <!-- Key Healthcare Features -->
+          <div class="benefits-grid">
+            <div class="benefit-item">
+              <div class="benefit-icon-box">
+                <i class="bi bi-calendar2-check-fill"></i>
+              </div>
+              <div class="benefit-text">
+                <strong>Direct OPD & Doctor Consultations</strong>
+                <span>Book confirmed slots with 50+ specialists across Cardiology, Pediatrics, Orthopedics & more.</span>
+              </div>
+            </div>
+
+            <div class="benefit-item">
+              <div class="benefit-icon-box">
+                <i class="bi bi-truck-front-fill"></i>
+              </div>
+              <div class="benefit-text">
+                <strong>Priority Ambulance Response</strong>
+                <span>Your residential address is pre-saved for instant GPS dispatch during medical emergencies.</span>
+              </div>
+            </div>
+
+            <div class="benefit-item">
+              <div class="benefit-icon-box">
+                <i class="bi bi-file-earmark-medical-fill"></i>
+              </div>
+              <div class="benefit-text">
+                <strong>24/7 Digital Health Records</strong>
+                <span>Access all lab results, prescriptions, and billing receipts securely on your patient dashboard.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ambulance Hotline Strip -->
+          <div class="ambulance-hero-strip">
+            <div class="siren-box">
+              <i class="bi bi-shield-plus"></i>
+            </div>
+            <div class="strip-text">
+              <strong>Emergency Care Hotline (24 Hours)</strong>
+              <span>Trauma Team & ICU on standby: <strong>Call 108</strong> or <strong>+91 911-222-3344</strong></span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Trust footer -->
+        <div class="d-flex align-items-center justify-content-between text-white-50 small">
+          <span><i class="bi bi-shield-lock-fill text-info me-1"></i> 100% HIPAA & Medical Privacy</span>
+          <span>NABH Certified Hospital</span>
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDE: PATIENT REGISTRATION FORM -->
+      <div class="register-form-side">
+
+        <!-- Hospital Brand Header -->
+        <a href="{% url 'core:home' %}" class="portal-brand">
+          <div class="brand-icon-box">
+            <i class="bi bi-hospital"></i>
+          </div>
+          <div class="brand-text">
+            <h4>Medicare Hospital</h4>
+            <span>Patient Registration Portal</span>
+          </div>
+        </a>
+
+        <h2 class="form-heading">Create Patient Account</h2>
+        <p class="form-desc">Fill in your medical & contact details to register with Medicare Hospital.</p>
+
+        <!-- Django Messages -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show py-2 small" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger py-2 small mb-3">
+            {{ form.non_field_errors.0 }}
+          </div>
+        {% endif %}
+
+        <!-- REGISTRATION FORM -->
+        <form method="post" id="registerForm" novalidate>
+          {% csrf_token %}
+
+          <!-- Row 1: First Name & Last Name -->
+          <div class="row g-2">
+            <div class="col-sm-6 form-group-custom">
+              <label class="form-label-custom" for="id_first_name">
+                First Name <span class="text-danger">*</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" 
+                       name="first_name" 
+                       id="id_first_name" 
+                       class="form-control-custom" 
+                       placeholder="e.g. Rahul" 
+                       value="{{ form.first_name.value|default:'' }}" 
+                       required>
+              </div>
+              {% if form.first_name.errors %}
+                <div class="field-error-msg">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ form.first_name.errors.0 }}</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-sm-6 form-group-custom">
+              <label class="form-label-custom" for="id_last_name">
+                Last Name <span class="text-danger">*</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="bi bi-person input-icon"></i>
+                <input type="text" 
+                       name="last_name" 
+                       id="id_last_name" 
+                       class="form-control-custom" 
+                       placeholder="e.g. Sharma" 
+                       value="{{ form.last_name.value|default:'' }}" 
+                       required>
+              </div>
+              {% if form.last_name.errors %}
+                <div class="field-error-msg">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ form.last_name.errors.0 }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Row 2: Username & Email -->
+          <div class="row g-2">
+            <div class="col-sm-6 form-group-custom">
+              <label class="form-label-custom" for="id_username">
+                Username <span class="text-danger">*</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="bi bi-at input-icon"></i>
+                <input type="text" 
+                       name="username" 
+                       id="id_username" 
+                       class="form-control-custom" 
+                       placeholder="e.g. rahulsharma" 
+                       value="{{ form.username.value|default:'' }}" 
+                       required>
+              </div>
+              {% if form.username.errors %}
+                <div class="field-error-msg">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ form.username.errors.0 }}</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-sm-6 form-group-custom">
+              <label class="form-label-custom" for="id_email">
+                Email Address <span class="text-danger">*</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="bi bi-envelope input-icon"></i>
+                <input type="email" 
+                       name="email" 
+                       id="id_email" 
+                       class="form-control-custom" 
+                       placeholder="e.g. rahul@example.com" 
+                       value="{{ form.email.value|default:'' }}" 
+                       required>
+              </div>
+              {% if form.email.errors %}
+                <div class="field-error-msg">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ form.email.errors.0 }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Row 3: Phone (Ambulance/Emergency Contact) & Date of Birth -->
+          <div class="row g-2">
+            <div class="col-sm-6 form-group-custom">
+              <label class="form-label-custom" for="id_phone">
+                Phone Number
+                <span class="badge-info-tag"><i class="bi bi-telephone-fill me-1"></i> Emergency SOS</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="bi bi-phone input-icon"></i>
+                <input type="tel" 
+                       name="phone" 
+                       id="id_phone" 
+                       class="form-control-custom" 
+                       placeholder="+91 98765 43210" 
+                       value="{{ form.phone.value|default:'' }}">
+              </div>
+              {% if form.phone.errors %}
+                <div class="field-error-msg">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ form.phone.errors.0 }}</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-sm-6 form-group-custom">
+              <label class="form-label-custom" for="id_date_of_birth">
+                Date of Birth
+              </label>
+              <div class="input-wrapper">
+                <i class="bi bi-calendar-event input-icon"></i>
+                <input type="date" 
+                       name="date_of_birth" 
+                       id="id_date_of_birth" 
+                       class="form-control-custom" 
+                       value="{{ form.date_of_birth.value|default:'' }}">
+              </div>
+              {% if form.date_of_birth.errors %}
+                <div class="field-error-msg">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ form.date_of_birth.errors.0 }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Row 4: Residential Address (for Ambulance Dispatch & Home Visits) -->
+          <div class="form-group-custom">
+            <label class="form-label-custom" for="id_address">
+              Residential Address
+              <span class="badge-info-tag"><i class="bi bi-geo-alt-fill me-1"></i> For Ambulance & Home Care</span>
+            </label>
+            <div class="input-wrapper">
+              <i class="bi bi-geo-alt input-icon"></i>
+              <input type="text" 
+                     name="address" 
+                     id="id_address" 
+                     class="form-control-custom" 
+                     placeholder="House/Flat No., Landmark, City, Pincode" 
+                     value="{{ form.address.value|default:'' }}">
+            </div>
+            {% if form.address.errors %}
+              <div class="field-error-msg">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ form.address.errors.0 }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Row 5: Password & Confirm Password -->
+          <div class="row g-2">
+            <div class="col-sm-6 form-group-custom">
+              <label class="form-label-custom" for="id_password1">
+                Password <span class="text-danger">*</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="bi bi-lock input-icon"></i>
+                <input type="password" 
+                       name="password1" 
+                       id="id_password1" 
+                       class="form-control-custom" 
+                       placeholder="••••••••" 
+                       required>
+                <button type="button" 
+                        class="pw-toggle-btn" 
+                        id="togglePassword1" 
+                        title="Show or hide password">
+                  <i class="bi bi-eye" id="eyeIcon1"></i>
+                </button>
+              </div>
+              {% if form.password1.errors %}
+                <div class="field-error-msg">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ form.password1.errors.0 }}</span>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-sm-6 form-group-custom">
+              <label class="form-label-custom" for="id_password2">
+                Confirm Password <span class="text-danger">*</span>
+              </label>
+              <div class="input-wrapper">
+                <i class="bi bi-shield-check input-icon"></i>
+                <input type="password" 
+                       name="password2" 
+                       id="id_password2" 
+                       class="form-control-custom" 
+                       placeholder="••••••••" 
+                       required>
+                <button type="button" 
+                        class="pw-toggle-btn" 
+                        id="togglePassword2" 
+                        title="Show or hide password">
+                  <i class="bi bi-eye" id="eyeIcon2"></i>
+                </button>
+              </div>
+              {% if form.password2.errors %}
+                <div class="field-error-msg">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ form.password2.errors.0 }}</span>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Medical Terms Disclaimer -->
+          <div class="terms-box">
+            <i class="bi bi-shield-check"></i>
+            <div>
+              By registering, you agree to Medicare Hospital's Patient Care Terms, consent to secure digital medical records storage, and receive emergency healthcare updates.
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-register-submit">
+            <span>Create Patient Account</span>
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </form>
+
+        <!-- Login Redirect Link -->
+        <div class="register-footer">
+          <span>Already registered with Medicare?</span>
+          <a href="{% url 'accounts:login' %}" class="ms-1 fw-bold">Log In to Patient Portal</a>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    // Password toggles
+    function setupPasswordToggle(btnId, inputId, iconId) {
+      const btn = document.getElementById(btnId);
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+
+      if (btn && input && icon) {
+        btn.addEventListener('click', function () {
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+          } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye';
+          }
+        });
+      }
+    }
+
+    setupPasswordToggle('togglePassword1', 'id_password1', 'eyeIcon1');
+    setupPasswordToggle('togglePassword2', 'id_password2', 'eyeIcon2');
+  </script>
+
+</body>
+</html>

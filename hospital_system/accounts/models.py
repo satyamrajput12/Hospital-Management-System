@@ -13,6 +13,7 @@ class User(AbstractUser):
     address = models.CharField(max_length=255, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    is_email_verified = models.BooleanField(default=False, help_text="Designates whether this user has verified their email.")
 
     def is_admin_role(self):
         return self.role == self.Role.ADMIN

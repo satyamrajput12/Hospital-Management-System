@@ -1,47 +1,115 @@
 {% extends 'base.html' %}
-{% block title %}My Profile{% endblock %}
+{% block title %}My Profile — Medicare{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-7">
-    <div class="card card-hospital p-4">
-      <h3 class="mb-3">My Profile</h3>
-      <p class="text-muted">Role: <span class="badge bg-secondary">{{ user.get_role_display }}</span></p>
-      <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">First Name</label>
-            {{ form.first_name }}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <!-- Email Verification Notice Banner -->
+      {% if not user.is_email_verified %}
+        <div class="alert alert-warning rounded-4 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <span style="font-size: 1.5rem;">⚠️</span>
+            <div>
+              <strong>Email Not Verified</strong>
+              <div class="small text-muted">Please verify your email address to book appointments and place orders.</div>
+            </div>
           </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Last Name</label>
-            {{ form.last_name }}
+          <form method="post" action="{% url 'accounts:resend_verification' %}" class="m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-dark rounded-pill px-3">Resend Verification Email</button>
+          </form>
+        </div>
+      {% endif %}
+
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pb-3 border-bottom mb-4">
+          <div class="d-flex align-items-center gap-3">
+            {% if user.profile_picture %}
+              <img src="{{ user.profile_picture.url }}" alt="Profile" class="rounded-circle border" style="width: 64px; height: 64px; object-fit: cover;">
+            {% else %}
+              <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                {{ user.first_name|first|default:user.username|first|upper }}
+              </div>
+            {% endif %}
+            <div>
+              <h3 class="mb-0 fw-bold">{{ user.get_full_name|default:user.username }}</h3>
+              <div class="d-flex align-items-center gap-2 mt-1">
+                <span class="badge bg-primary rounded-pill px-3 py-1">{{ user.get_role_display }}</span>
+                {% if user.is_email_verified %}
+                  <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1">✓ Verified</span>
+                {% else %}
+                  <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 py-1">Unverified</span>
+                {% endif %}
+              </div>
+            </div>
           </div>
+
+          <a href="{% url 'accounts:password_change' %}" class="btn btn-outline-secondary rounded-pill px-3 py-2 small">
+            🔒 Change Password
+          </a>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          {{ form.email }}
-        </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Phone</label>
-            {{ form.phone }}
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">First Name</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Last Name</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>{% endif %}
+            </div>
           </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Date of Birth</label>
-            {{ form.date_of_birth }}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Email Address</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
           </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Address</label>
-          {{ form.address }}
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Profile Picture</label>
-          {{ form.profile_picture }}
-        </div>
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-      </form>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Phone Number</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Date of Birth</label>
+              {{ form.date_of_birth }}
+              {% if form.date_of_birth.errors %}<div class="text-danger small mt-1">{{ form.date_of_birth.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Residential Address</label>
+            {{ form.address }}
+            {% if form.address.errors %}<div class="text-danger small mt-1">{{ form.address.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-dark">Profile Picture</label>
+            {{ form.profile_picture }}
+            {% if form.profile_picture.errors %}<div class="text-danger small mt-1">{{ form.profile_picture.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between pt-2">
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+              Save Changes
+            </button>
+            <a href="{% url 'core:redirect_dashboard' %}" class="text-muted text-decoration-none small">
+              ← Return to Dashboard
+            </a>
+          </div>
+        </form>
+
+      </div>
     </div>
   </div>
 </div>

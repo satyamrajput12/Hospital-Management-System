@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - Medicare Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card card-hospital p-4 shadow-sm border-0">
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+          <h3 class="fw-bold mb-1">{{ title }}</h3>
+          <p class="text-muted mb-0">Pharmacy catalog item information and inventory tracking</p>
+        </div>
+        <a href="{% url 'corepages:admin_product_list' %}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i> Inventory
+        </a>
+      </div>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            Please correct the errors in the form below.
+          </div>
+        {% endif %}
+
+        <div class="row mb-3">
+          <div class="col-md-8">
+            <label class="form-label fw-semibold">Product Name <span class="text-danger">*</span></label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+            {{ form.category }}
+            {% if form.category.errors %}<div class="text-danger small mt-1">{{ form.category.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Generic Name / Composition</label>
+            {{ form.generic_name }}
+            {% if form.generic_name.errors %}<div class="text-danger small mt-1">{{ form.generic_name.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Manufacturer</label>
+            {{ form.manufacturer }}
+            {% if form.manufacturer.errors %}<div class="text-danger small mt-1">{{ form.manufacturer.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Price (₹) <span class="text-danger">*</span></label>
+            {{ form.price }}
+            {% if form.price.errors %}<div class="text-danger small mt-1">{{ form.price.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Discounted Price (₹)</label>
+            {{ form.discount_price }}
+            {% if form.discount_price.errors %}<div class="text-danger small mt-1">{{ form.discount_price.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Stock Quantity <span class="text-danger">*</span></label>
+            {{ form.stock }}
+            {% if form.stock.errors %}<div class="text-danger small mt-1">{{ form.stock.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">Dosage / Unit</label>
+            {{ form.dosage }}
+            <small class="form-text text-muted">e.g. 500mg, 100ml Syrup, 10 Tablets</small>
+            {% if form.dosage.errors %}<div class="text-danger small mt-1">{{ form.dosage.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">URL Slug</label>
+            {{ form.slug }}
+            <small class="form-text text-muted">Leave blank to auto-generate</small>
+            {% if form.slug.errors %}<div class="text-danger small mt-1">{{ form.slug.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+          {{ form.description }}
+          {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors }}</div>{% endif %}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Product Image</label>
+          {{ form.image }}
+          {% if product and product.image %}
+            <div class="mt-2 small text-muted">
+              Current: <a href="{{ product.image.url }}" target="_blank">{{ product.image.name }}</a>
+            </div>
+          {% endif %}
+          {% if form.image.errors %}<div class="text-danger small mt-1">{{ form.image.errors }}</div>{% endif %}
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="form-check form-switch mt-2">
+              {{ form.requires_prescription }}
+              <label class="form-check-label ms-2" for="{{ form.requires_prescription.id_for_label }}">Requires Doctor Prescription (Rx)</label>
+            </div>
+            {% if form.requires_prescription.errors %}<div class="text-danger small mt-1">{{ form.requires_prescription.errors }}</div>{% endif %}
+          </div>
+          <div class="col-md-6">
+            <div class="form-check form-switch mt-2">
+              {{ form.is_active }}
+              <label class="form-check-label ms-2" for="{{ form.is_active.id_for_label }}">Active for Public Sale</label>
+            </div>
+            {% if form.is_active.errors %}<div class="text-danger small mt-1">{{ form.is_active.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+          <a href="{% url 'corepages:admin_product_list' %}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-check2-circle me-1"></i> Save Product
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

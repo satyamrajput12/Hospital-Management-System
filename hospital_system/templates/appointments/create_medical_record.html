@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Create Medical Record — Medicare Doctor Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        
+        <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+          <div>
+            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-bold mb-1">
+              CLINICAL CONSULTATION RECORD
+            </span>
+            <h3 class="fw-bold mb-0">Record Medical Diagnosis</h3>
+          </div>
+          <div class="text-end">
+            <div class="fw-bold text-dark">{{ appointment.patient.get_full_name }}</div>
+            <div class="small text-muted">Visit: {{ appointment.appointment_date|date:"M d, Y" }}</div>
+          </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Record Title / Chief Complaint <span class="text-danger">*</span></label>
+            {{ form.title }}
+            {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Clinical Diagnosis <span class="text-danger">*</span></label>
+            {{ form.diagnosis }}
+            {% if form.diagnosis.errors %}<div class="text-danger small mt-1">{{ form.diagnosis.errors.0 }}</div>{% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Reported Symptoms</label>
+            {{ form.symptoms }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Treatment Plan & Clinical Advice</label>
+            {{ form.treatment_plan }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Confidential Clinical Notes</label>
+            {{ form.notes }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Attach Supporting Document / Report (Optional)</label>
+            {{ form.record_file }}
+          </div>
+
+          <div class="form-check form-switch mb-4">
+            {{ form.is_released_to_patient }}
+            <label class="form-check-label fw-semibold text-dark" for="{{ form.is_released_to_patient.id_for_label }}">
+              Release Record to Patient Portal
+            </label>
+            <div class="small text-muted">When checked, the patient can view this record in their Medicare dashboard.</div>
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+            <button type="submit" class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
+              Save Medical Record
+            </button>
+            <a href="{% url 'appointments:doctor_appointments' %}" class="text-muted small text-decoration-none">
+              Cancel
+            </a>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

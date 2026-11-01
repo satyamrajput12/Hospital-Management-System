@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Order #{{ order.order_number }} — Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">Order #{{ order.order_number }}</h2>
+      <p class="text-muted mb-0">Placed on {{ order.created_at|date:"F d, Y at h:i A" }}</p>
+    </div>
+    <a href="{% url 'core:my_orders' %}" class="btn btn-outline-secondary rounded-pill px-3">
+      ← Back to Orders
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Order Items Table -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h4 class="fw-bold mb-3 border-bottom pb-2">Purchased Items</h4>
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Product</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+                <tr>
+                  <td>
+                    <div class="fw-bold text-dark">{{ item.product_name }}</div>
+                  </td>
+                  <td>₹{{ item.unit_price }}</td>
+                  <td>{{ item.quantity }}</td>
+                  <td class="text-end fw-bold text-dark">₹{{ item.subtotal }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot class="border-top">
+              <tr>
+                <td colspan="3" class="text-end fw-bold">Total Amount Charged:</td>
+                <td class="text-end fs-5 fw-bold text-primary">₹{{ order.total_amount }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Payment Audit Details -->
+      {% if payments %}
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+          <h4 class="fw-bold mb-3 border-bottom pb-2">Payment Record</h4>
+          {% for p in payments %}
+            <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+              <div>
+                <div class="fw-semibold text-dark">{{ p.payment_method }} &middot; Ref: {{ p.transaction_id }}</div>
+                <div class="small text-muted">{{ p.created_at|date:"M d, Y h:i A" }}</div>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-success rounded-pill">{{ p.status }}</span>
+                <div class="fw-bold text-dark">₹{{ p.amount }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Status & Shipping Card -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h4 class="fw-bold mb-3 border-bottom pb-2">Status & Delivery</h4>
+
+        <div class="mb-3">
+          <span class="text-muted small">Current Order Status:</span>
+          <div>
+            {% if order.status == 'PENDING' %}
+              <span class="badge bg-warning text-dark rounded-pill px-3 py-1 fs-6">Pending Fulfillment</span>
+            {% elif order.status == 'PROCESSING' %}
+              <span class="badge bg-info text-dark rounded-pill px-3 py-1 fs-6">Processing & Packed</span>
+            {% elif order.status == 'SHIPPED' %}
+              <span class="badge bg-primary text-white rounded-pill px-3 py-1 fs-6">Shipped / Out for Delivery</span>
+            {% elif order.status == 'DELIVERED' %}
+              <span class="badge bg-success text-white rounded-pill px-3 py-1 fs-6">Delivered</span>
+            {% else %}
+              <span class="badge bg-danger text-white rounded-pill px-3 py-1 fs-6">Cancelled</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <span class="text-muted small">Shipping Destination:</span>
+          <div class="fw-bold text-dark">{{ order.full_name }}</div>
+          <div>{{ order.shipping_address }}</div>
+          <div>{{ order.city }} - {{ order.postal_code }}</div>
+          <div class="small text-muted mt-1">📞 {{ order.phone }} | ✉️ {{ order.email }}</div>
+        </div>
+
+        {% if order.notes %}
+          <div class="mb-3">
+            <span class="text-muted small">Delivery Notes:</span>
+            <div class="small text-dark bg-light p-2 rounded">{{ order.notes }}</div>
+          </div>
+        {% endif %}
+
+        <div class="pt-3 border-top d-flex gap-2">
+          <button type="button" class="btn btn-outline-primary rounded-pill w-100" onclick="window.print();">
+            🖨️ Print Receipt
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

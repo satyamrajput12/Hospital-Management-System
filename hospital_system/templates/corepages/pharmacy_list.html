@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Doorstep Pharmacy & Healthcare Products — Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  
+  <!-- Header Banner -->
+  <div class="p-4 p-md-5 mb-4 rounded-4 text-white shadow-sm" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <span class="badge bg-white text-primary rounded-pill px-3 py-1 fw-bold mb-2">24/7 DOORSTEP PHARMACY</span>
+        <h1 class="display-6 fw-bold">Certified Medicines & Health Products</h1>
+        <p class="lead mb-0 text-white-50">100% genuine pharmaceutical supplies, wellness supplements, and medical equipment delivered to your doorstep.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Category Filters -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <input type="text" name="q" value="{{ query }}" class="form-control rounded-pill px-3" placeholder="Search medicine or product name...">
+      </div>
+      <div class="col-md-3">
+        <select name="category" class="form-select rounded-pill px-3">
+          <option value="">All Health Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="sort" class="form-select rounded-pill px-3">
+          <option value="">Sort by</option>
+          <option value="price_low" {% if selected_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+          <option value="price_high" {% if selected_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+          <option value="discount" {% if selected_sort == 'discount' %}selected{% endif %}>Highest Discount</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary rounded-pill px-4 flex-grow-1">Filter</button>
+        {% if query or selected_category or selected_sort %}
+          <a href="{% url 'core:pharmacy_list' %}" class="btn btn-outline-secondary rounded-pill">Reset</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Product Grid -->
+  <div class="row g-4">
+    {% for prod in page_obj %}
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-column position-relative">
+          {% if prod.discount_percent > 0 %}
+            <span class="badge bg-danger rounded-pill position-absolute top-0 end-0 m-3 px-2 py-1">
+              {{ prod.discount_percent }}% Off
+            </span>
+          {% endif %}
+          
+          <div class="text-center py-3 mb-2" style="height: 160px; display: flex; align-items: center; justify-content: center;">
+            <a href="{% url 'core:product_detail' prod.pk %}">
+              <img src="{% if prod.image %}{{ prod.image.url }}{% elif prod.image_url_fallback %}{{ prod.image_url_fallback }}{% else %}{% static 'images/prod_1.jpg' %}{% endif %}" alt="{{ prod.name }}" style="max-height: 140px; max-width: 100%; object-fit: contain;">
+            </a>
+          </div>
+
+          <div class="small text-muted mb-1">{{ prod.category.name|default:"General Health" }}</div>
+          <h5 class="fw-bold mb-2 flex-grow-1" style="font-size: 1rem;">
+            <a href="{% url 'core:product_detail' prod.pk %}" class="text-dark text-decoration-none">{{ prod.name }}</a>
+          </h5>
+
+          <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+            <div>
+              <span class="fs-5 fw-bold text-dark">₹{{ prod.effective_price }}</span>
+              {% if prod.discount_percent > 0 %}
+                <span class="small text-muted text-decoration-line-through ms-1">₹{{ prod.price }}</span>
+              {% endif %}
+            </div>
+
+            {% if prod.is_in_stock %}
+              <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" onclick="addToCart({{ prod.pk }}, '{{ prod.name|escapejs }}', {{ prod.effective_price }})">
+                + Add
+              </button>
+            {% else %}
+              <span class="badge bg-secondary rounded-pill">Out of Stock</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12 text-center py-5">
+        <div style="font-size: 3rem;">💊</div>
+        <h4 class="fw-bold mt-2">No products found</h4>
+        <p class="text-muted">Try selecting another category or clear your search terms.</p>
+        <a href="{% url 'core:pharmacy_list' %}" class="btn btn-outline-primary rounded-pill px-4">Show All Products</a>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+      <span class="text-muted small">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ total_products }} products</span>
+      <ul class="pagination pagination-sm m-0">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link rounded-pill me-1" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Previous</a></li>
+        {% endif %}
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link rounded-pill" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_sort %}&sort={{ selected_sort }}{% endif %}">Next</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

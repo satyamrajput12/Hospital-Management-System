@@ -13,6 +13,8 @@
   
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   
   <!-- Medicare Stylesheet -->
   <link href="{% static 'css/medicare.css' %}?v=2.2" rel="stylesheet">
@@ -56,15 +58,15 @@
     </div>
 
     <!-- Search Bar -->
-    <div class="mc-search-form">
+    <form method="get" action="{% url 'core:search' %}" class="mc-search-form">
       <div class="mc-search-wrapper">
         <svg class="mc-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="mcSearchInput" class="mc-search-input" placeholder="Medicine and healthcare services...">
+        <input type="text" name="q" id="mcSearchInput" class="mc-search-input" placeholder="Search doctors, medicines, tests..." value="{{ request.GET.q|default:'' }}">
       </div>
-    </div>
+    </form>
 
     <!-- Right Actions -->
     <div class="mc-nav-actions">
@@ -78,19 +80,19 @@
         <ul class="dropdown-menu shadow border-0 rounded-4 p-2 mt-2">
           <li><a class="dropdown-item rounded-3 py-2" href="{% url 'doctors:list' %}">🩺 Doctor Consultations</a></li>
           <li><a class="dropdown-item rounded-3 py-2" href="{% url 'departments:list' %}">🏥 Hospital Departments</a></li>
-          <li><a class="dropdown-item rounded-3 py-2" href="#lab-tests-section">🧪 Lab Tests & Diagnostics</a></li>
-          <li><a class="dropdown-item rounded-3 py-2" href="#pharmacy-section">💊 Pharmacy & Best Deals</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="{% url 'departments:lab_test_list' %}">🧪 Lab Tests & Diagnostics</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="{% url 'core:pharmacy_list' %}">💊 Pharmacy & Best Deals</a></li>
         </ul>
       </div>
 
-      <!-- Offers -->
-      <a href="#pharmacy-section" class="mc-nav-link">
+      <!-- Offers / Pharmacy Link -->
+      <a href="{% url 'core:pharmacy_list' %}" class="mc-nav-link">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path><circle cx="12" cy="12" r="4"></circle></svg>
-        <span>Offers</span>
+        <span>Pharmacy</span>
       </a>
 
       <!-- Cart Button with Dynamic Badge -->
-      <button type="button" class="mc-cart-btn" onclick="openCartDrawer()">
+      <button type="button" class="mc-cart-btn" onclick="openCartDrawer()" aria-label="Open Health Cart">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
         <span>Cart</span>
         <span class="mc-cart-badge">0</span>
@@ -103,18 +105,28 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             <span>Hi, {{ user.first_name|default:user.username }}</span>
           </a>
-          <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mt-2">
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mt-2" style="min-width: 220px;">
             <li><a class="dropdown-item rounded-3 py-2 fw-semibold" href="{% url 'core:redirect_dashboard' %}">📊 My Dashboard</a></li>
             {% if user.is_patient_role %}
               <li><a class="dropdown-item rounded-3 py-2" href="{% url 'appointments:my_appointments' %}">📅 My Appointments</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'departments:my_lab_bookings' %}">🧪 My Lab Bookings</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'core:my_orders' %}">📦 My Pharmacy Orders</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'appointments:patient_medical_history' %}">📋 Medical Records & Rx</a></li>
             {% elif user.is_doctor_role %}
               <li><a class="dropdown-item rounded-3 py-2" href="{% url 'appointments:doctor_appointments' %}">📅 Doctor Schedule</a></li>
               <li><a class="dropdown-item rounded-3 py-2" href="{% url 'doctors:availability_manage' %}">⏰ Manage Availability</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'doctors:profile_edit' %}">🩺 Doctor Profile</a></li>
             {% elif user.is_superuser or user.is_admin_role %}
               <li><a class="dropdown-item rounded-3 py-2" href="{% url 'doctors:manage_list' %}">👨‍⚕️ Manage Doctors</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'accounts:admin_patient_list' %}">👥 Manage Patients</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'departments:admin_list' %}">🏥 Hospital Departments</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'departments:admin_lab_test_list' %}">🧪 Manage Lab Tests</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'core:admin_product_list' %}">💊 Pharmacy Products</a></li>
+              <li><a class="dropdown-item rounded-3 py-2" href="{% url 'core:admin_order_list' %}">📦 Pharmacy Orders</a></li>
               <li><a class="dropdown-item rounded-3 py-2" href="{% url 'appointments:all_appointments' %}">📋 All Appointments</a></li>
             {% endif %}
             <li><a class="dropdown-item rounded-3 py-2" href="{% url 'accounts:profile' %}">👤 Edit Profile</a></li>
+            <li><a class="dropdown-item rounded-3 py-2" href="{% url 'accounts:password_change' %}">🔒 Change Password</a></li>
             <li><hr class="dropdown-divider"></li>
             <li>
               <form method="post" action="{% url 'accounts:logout' %}" class="m-0 p-0">
@@ -163,16 +175,19 @@
     <button type="button" class="mc-cart-close" onclick="closeCartDrawer()">&times;</button>
   </div>
   <div class="mc-cart-body" id="mcCartItems">
-    <!-- Dynamic Cart Content -->
+    <!-- Dynamic Cart Content from Backend -->
   </div>
   <div class="mc-cart-footer">
     <div class="mc-cart-subtotal">
       <span>Subtotal:</span>
       <span id="mcCartSubtotal">₹0.00</span>
     </div>
-    <button type="button" class="mc-checkout-btn" onclick="showToast('Thank you! Order placed successfully.'); closeCartDrawer(); medicareCart = []; saveCart();">
+    <button type="button" class="mc-checkout-btn" onclick="proceedToCheckout()">
       Proceed to Checkout ➔
     </button>
+    <a href="{% url 'core:cart_view' %}" class="d-block text-center mt-2 small text-muted text-decoration-none">
+      View Full Cart Page
+    </a>
   </div>
 </div>
 

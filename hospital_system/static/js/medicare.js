@@ -1,79 +1,159 @@
 /**
  * Medicare Interactive JavaScript
- * Supports:
- * - Dynamic Shopping Cart with Drawer and badge counters
+ * - Persistent Database-Backed Shopping Cart with CSRF & Drawer UI
+ * - Server-side search & Instant UI updates
  * - Symptom Pill filtering for Doctor Cards
  * - Location selector modal/dropdown
- * - Live Search Filtering
  */
 
-// Cart State
-let medicareCart = JSON.parse(localStorage.getItem('medicare_cart') || '[]');
-
-function saveCart() {
-  localStorage.setItem('medicare_cart', JSON.stringify(medicareCart));
-  updateCartUI();
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
 }
 
-function updateCartUI() {
+// Global Cart State
+let currentCartData = { items: [], total_items: 0, subtotal: 0, subtotal_formatted: '₹0.00' };
+
+async function fetchCart() {
+  try {
+    const res = await fetch('/cart/json/');
+    if (res.ok) {
+      const data = await res.json();
+      currentCartData = data;
+      renderCartUI();
+    }
+  } catch (err) {
+    console.error('Error fetching cart:', err);
+  }
+}
+
+function renderCartUI() {
   const badges = document.querySelectorAll('.mc-cart-badge');
-  const totalCount = medicareCart.reduce((acc, item) => acc + item.qty, 0);
   badges.forEach(b => {
-    b.textContent = totalCount;
+    b.textContent = currentCartData.total_items || 0;
   });
 
   const cartBody = document.getElementById('mcCartItems');
   const subtotalEl = document.getElementById('mcCartSubtotal');
-  
+
   if (!cartBody) return;
 
-  if (medicareCart.length === 0) {
+  if (!currentCartData.items || currentCartData.items.length === 0) {
     cartBody.innerHTML = `
       <div class="text-center py-5">
         <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🛒</div>
         <div class="fw-bold text-dark">Your cart is empty</div>
         <div class="text-muted small mt-1">Add medicines, lab tests, or healthcare products to proceed.</div>
+        <a href="/pharmacy/" class="btn btn-sm btn-outline-primary rounded-pill mt-3 px-3">Browse Pharmacy</a>
       </div>
     `;
     if (subtotalEl) subtotalEl.textContent = '₹0.00';
     return;
   }
 
-  let total = 0;
-  cartBody.innerHTML = medicareCart.map((item, idx) => {
-    total += item.price * item.qty;
-    return `
-      <div class="mc-cart-item">
-        <img src="${item.image}" alt="${item.title}" class="mc-cart-item-img">
-        <div class="mc-cart-item-info">
-          <div class="mc-cart-item-title">${item.title}</div>
-          <div class="mc-cart-item-price">₹${item.price.toFixed(2)} &times; ${item.qty}</div>
+  cartBody.innerHTML = currentCartData.items.map(item => `
+    <div class="mc-cart-item d-flex align-items-center justify-content-between p-2 mb-2 border-bottom">
+      <img src="${item.image_url}" alt="${item.name}" class="mc-cart-item-img rounded" style="width: 48px; height: 48px; object-fit: cover;">
+      <div class="mc-cart-item-info flex-grow-1 px-3">
+        <div class="mc-cart-item-title fw-semibold text-dark small">${item.name}</div>
+        <div class="mc-cart-item-price text-muted small">
+          ₹${item.price.toFixed(2)} &times; 
+          <span class="d-inline-flex align-items-center gap-1">
+            <button type="button" class="btn btn-xs btn-outline-secondary p-0 px-1" style="font-size: 0.7rem;" onclick="updateCartItemQty(${item.id}, ${item.quantity - 1})">-</button>
+            <span class="fw-bold px-1">${item.quantity}</span>
+            <button type="button" class="btn btn-xs btn-outline-secondary p-0 px-1" style="font-size: 0.7rem;" onclick="updateCartItemQty(${item.id}, ${item.quantity + 1})" ${item.quantity >= item.stock ? 'disabled' : ''}>+</button>
+          </span>
         </div>
-        <button type="button" class="mc-cart-item-remove" onclick="removeCartItem(${idx})">&times;</button>
       </div>
-    `;
-  }).join('');
+      <button type="button" class="mc-cart-item-remove btn btn-sm text-danger p-0 border-0" onclick="removeCartItemBackend(${item.id})" title="Remove item">&times;</button>
+    </div>
+  `).join('');
 
   if (subtotalEl) {
-    subtotalEl.textContent = `₹${total.toFixed(2)}`;
+    subtotalEl.textContent = currentCartData.subtotal_formatted || `₹${currentCartData.subtotal.toFixed(2)}`;
   }
 }
 
-function addToCart(title, price, image) {
-  const existing = medicareCart.find(item => item.title === title);
-  if (existing) {
-    existing.qty += 1;
-  } else {
-    medicareCart.push({ title, price: parseFloat(price), image, qty: 1 });
+async function addToCart(productId, title, price) {
+  const csrftoken = getCookie('csrftoken');
+  try {
+    const res = await fetch('/cart/add/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ product_id: productId, quantity: 1 })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      currentCartData = data.cart;
+      renderCartUI();
+      showToast(data.message || `Added to health cart!`);
+      openCartDrawer();
+    } else {
+      showToast(`⚠️ ${data.error || 'Could not add to cart.'}`);
+    }
+  } catch (err) {
+    console.error('Add to cart error:', err);
+    showToast('Could not reach server. Please try again.');
   }
-  saveCart();
-  showToast(`Added "${title}" to cart!`);
-  openCartDrawer();
 }
 
-function removeCartItem(index) {
-  medicareCart.splice(index, 1);
-  saveCart();
+async function updateCartItemQty(itemId, newQty) {
+  const csrftoken = getCookie('csrftoken');
+  try {
+    const res = await fetch('/cart/update/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ item_id: itemId, quantity: newQty })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      currentCartData = data.cart;
+      renderCartUI();
+    } else {
+      showToast(`⚠️ ${data.error || 'Could not update item.'}`);
+    }
+  } catch (err) {
+    console.error('Update cart error:', err);
+  }
+}
+
+async function removeCartItemBackend(itemId) {
+  const csrftoken = getCookie('csrftoken');
+  try {
+    const res = await fetch(`/cart/remove/${itemId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrftoken,
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      currentCartData = data.cart;
+      renderCartUI();
+      showToast(data.message || 'Item removed from cart.');
+    }
+  } catch (err) {
+    console.error('Remove cart error:', err);
+  }
 }
 
 function openCartDrawer() {
@@ -92,6 +172,14 @@ function closeCartDrawer() {
     drawer.classList.remove('open');
     backdrop.classList.remove('open');
   }
+}
+
+function proceedToCheckout() {
+  if (!currentCartData.items || currentCartData.items.length === 0) {
+    showToast('Your cart is empty. Please add medicines or products first.');
+    return;
+  }
+  window.location.href = '/checkout/';
 }
 
 function showToast(message) {
@@ -142,29 +230,6 @@ function filterDoctorsBySymptom(pillElement, symptom) {
   });
 }
 
-// Search functionality
-function handleSearchInput(e) {
-  const query = e.target.value.toLowerCase().trim();
-  const doctorCards = document.querySelectorAll('.mc-doctor-card');
-  const productCards = document.querySelectorAll('.mc-product-card');
-
-  if (!query) {
-    doctorCards.forEach(c => c.style.display = 'flex');
-    productCards.forEach(c => c.style.display = 'flex');
-    return;
-  }
-
-  doctorCards.forEach(card => {
-    const text = card.textContent.toLowerCase();
-    card.style.display = text.includes(query) ? 'flex' : 'none';
-  });
-
-  productCards.forEach(card => {
-    const text = card.textContent.toLowerCase();
-    card.style.display = text.includes(query) ? 'flex' : 'none';
-  });
-}
-
 // Newsletter subscription
 function handleNewsletterSubmit(e) {
   e.preventDefault();
@@ -177,7 +242,7 @@ function handleNewsletterSubmit(e) {
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
-  updateCartUI();
+  fetchCart();
 
   const savedCity = localStorage.getItem('medicare_city');
   if (savedCity) {
@@ -185,8 +250,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (valEl) valEl.textContent = savedCity;
   }
 
+  // Bind Enter key on search bar to trigger server search
   const searchInput = document.getElementById('mcSearchInput');
   if (searchInput) {
-    searchInput.addEventListener('input', handleSearchInput);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const val = searchInput.value.trim();
+        if (val) {
+          window.location.href = `/search/?q=${encodeURIComponent(val)}`;
+        }
+      }
+    });
   }
 });

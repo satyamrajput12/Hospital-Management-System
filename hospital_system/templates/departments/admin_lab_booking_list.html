@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Manage Lab Bookings - Medicare Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="fw-bold mb-1">Laboratory Bookings</h2>
+    <p class="text-muted mb-0">Review diagnostic appointments, sample collection status, and reporting</p>
+  </div>
+  <div class="d-flex gap-2">
+    <form method="get" class="d-flex">
+      <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+        <option value="">All Statuses</option>
+        {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if status_filter == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    <a href="{% url 'departments:admin_test_list' %}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-funnel me-1"></i> Tests Catalog
+    </a>
+  </div>
+</div>
+
+<div class="card card-hospital border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Booking ID</th>
+          <th>Patient</th>
+          <th>Diagnostic Test</th>
+          <th>Date</th>
+          <th>Collection</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+          <tr>
+            <td><code>#LB-{{ booking.id }}</code></td>
+            <td>
+              <strong>{{ booking.patient.get_full_name|default:booking.patient.username }}</strong>
+              <div class="text-muted small">{{ booking.patient.email }}</div>
+            </td>
+            <td>
+              <strong>{{ booking.lab_test.name }}</strong>
+            </td>
+            <td>
+              <i class="bi bi-calendar3 me-1 text-muted"></i>{{ booking.booking_date|date:"M d, Y" }}
+            </td>
+            <td>
+              {% if booking.home_collection %}
+                <span class="badge bg-primary-subtle text-primary"><i class="bi bi-house-door me-1"></i> Home Sample</span>
+              {% else %}
+                <span class="badge bg-light text-dark border"><i class="bi bi-building me-1"></i> Lab Walk-in</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="fw-bold text-success">₹{{ booking.price_at_booking }}</span>
+            </td>
+            <td>
+              <span class="badge {% if booking.status == 'COMPLETED' %}bg-success{% elif booking.status == 'CANCELLED' %}bg-danger{% elif booking.status == 'SAMPLE_COLLECTED' %}bg-info text-dark{% else %}bg-warning text-dark{% endif %}">
+                {{ booking.get_status_display }}
+              </span>
+            </td>
+            <td class="text-end">
+              <a href="{% url 'departments:admin_booking_update' booking.id %}" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-pencil-square me-1"></i> Update
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-center py-4 text-muted">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              No diagnostic bookings found.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}404 — Page Not Found | Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center my-auto">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-5 bg-white">
+        <div style="font-size: 4.5rem; line-height: 1;">🔍</div>
+        <h1 class="display-5 fw-bold text-dark mt-3">404</h1>
+        <h3 class="fw-semibold text-secondary mb-3">Page Not Found</h3>
+        <p class="text-muted mb-4">
+          The healthcare resource, clinic page, or document you were looking for does not exist or has been moved.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          <a href="{% url 'core:home' %}" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+            ← Return to Homepage
+          </a>
+          <a href="{% url 'doctors:list' %}" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold">
+            Find Doctors
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

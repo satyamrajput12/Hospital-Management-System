@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}500 — Internal Server Error | Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center my-auto">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-5 bg-white">
+        <div style="font-size: 4.5rem; line-height: 1;">🏥</div>
+        <h1 class="display-5 fw-bold text-danger mt-3">500</h1>
+        <h3 class="fw-semibold text-dark mb-3">Internal Server Error</h3>
+        <p class="text-muted mb-4">
+          Our medical systems encountered an unexpected technical glitch. Our technical team has been notified.
+        </p>
+        <a href="{% url 'core:home' %}" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+          ← Return to Homepage
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

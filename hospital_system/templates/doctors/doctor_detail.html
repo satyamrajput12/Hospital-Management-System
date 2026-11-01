@@ -1,46 +1,196 @@
 {% extends 'base.html' %}
-{% block title %}Dr. {{ doctor.user.get_full_name }}{% endblock %}
+{% load static %}
+
+{% block title %}Dr. {{ doctor.user.get_full_name }} — {{ doctor.specialization }} | Medicare{% endblock %}
+
 {% block content %}
-<div class="row">
-  <div class="col-md-8">
-    <div class="card card-hospital p-4 mb-3">
-      <div class="d-flex align-items-center mb-3">
-        <div class="avatar-circle me-3" style="width:64px;height:64px;font-size:1.4rem;">{{ doctor.user.first_name|first|upper }}{{ doctor.user.last_name|first|upper }}</div>
-        <div>
-          <h3 class="mb-0">Dr. {{ doctor.user.get_full_name }}</h3>
-          <p class="text-muted mb-0">{{ doctor.specialization }} &middot; {{ doctor.department.name }}</p>
+<section class="mc-doc-directory-page">
+
+  <!-- Breadcrumb -->
+  <nav class="mc-breadcrumb" aria-label="breadcrumb">
+    <a href="{% url 'core:home' %}"><i class="bi bi-house-door me-1"></i>Home</a>
+    <span class="separator">/</span>
+    <a href="{% url 'doctors:list' %}">Our Doctors</a>
+    <span class="separator">/</span>
+    <span class="current">Dr. {{ doctor.user.get_full_name }}</span>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Main Clinical Profile Column -->
+    <div class="col-lg-8">
+      
+      <!-- Doctor Hero Card -->
+      <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+        <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start gap-4">
+          
+          <!-- Avatar Container -->
+          <div class="position-relative flex-shrink-0">
+            {% if doctor.user.profile_picture %}
+              <img 
+                src="{{ doctor.user.profile_picture.url }}" 
+                alt="Dr. {{ doctor.user.get_full_name }}" 
+                class="rounded-4 object-fit-cover shadow-sm"
+                style="width: 140px; height: 140px; border: 4px solid #ffffff;"
+              >
+            {% else %}
+              <div 
+                class="rounded-4 d-flex align-items-center justify-content-center text-white shadow-sm"
+                style="width: 140px; height: 140px; background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%); font-size: 2.5rem; font-weight: 800; font-family: var(--mc-font-display);"
+              >
+                {{ doctor.user.first_name|first|upper }}{{ doctor.user.last_name|first|upper }}
+              </div>
+            {% endif %}
+            <span class="position-absolute bottom-0 end-0 bg-success border border-3 border-white rounded-circle p-2" title="Available for appointments"></span>
+          </div>
+
+          <!-- Doctor Key Details -->
+          <div class="flex-grow-1 text-center text-md-start">
+            <div class="d-flex flex-wrap justify-content-center justify-content-md-start align-items-center gap-2 mb-2">
+              <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2 rounded-pill">
+                {{ doctor.department.name }}
+              </span>
+              <span class="badge bg-success-subtle text-success fw-semibold px-3 py-2 rounded-pill">
+                <i class="bi bi-patch-check-fill me-1"></i>Verified Specialist
+              </span>
+              <span class="badge bg-warning-subtle text-warning-emphasis fw-semibold px-3 py-2 rounded-pill">
+                <i class="bi bi-star-fill text-warning me-1"></i>4.9 (120+ reviews)
+              </span>
+            </div>
+
+            <h2 class="fw-bold mb-1" style="font-family: var(--mc-font-display); color: var(--mc-navy);">
+              Dr. {{ doctor.user.get_full_name }}
+            </h2>
+            <p class="text-primary fw-semibold mb-2" style="font-size: 1.05rem;">
+              {{ doctor.specialization }}
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 text-muted small mt-3">
+              <div>
+                <i class="bi bi-award text-primary me-1"></i>
+                <strong>{{ doctor.experience_years }}+ Years</strong> Experience
+              </div>
+              <div>
+                <i class="bi bi-mortarboard text-primary me-1"></i>
+                {{ doctor.qualification|default:"MBBS, Specialist MD" }}
+              </div>
+              <div>
+                <i class="bi bi-geo-alt text-primary me-1"></i>
+                Medicare Central Hospital
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
-      <p><strong>Qualification:</strong> {{ doctor.qualification|default:"—" }}</p>
-      <p><strong>Experience:</strong> {{ doctor.experience_years }} years</p>
-      <p><strong>Consultation Fee:</strong> ₹{{ doctor.consultation_fee }}</p>
-      <p>{{ doctor.bio }}</p>
+
+      <!-- About Doctor & Bio -->
+      <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+        <h5 class="fw-bold mb-3" style="font-family: var(--mc-font-display); color: var(--mc-navy);">
+          <i class="bi bi-person-lines-fill text-primary me-2"></i>About Doctor
+        </h5>
+        <p class="text-secondary leading-relaxed mb-0">
+          {{ doctor.bio|default:"Dr. "|add:doctor.user.get_full_name|add:" is an accomplished medical specialist committed to evidence-based healthcare, preventative medicine, and comprehensive clinical consultations. With extensive diagnostic expertise and patient-centric care protocols, every patient receives a personalized treatment plan." }}
+        </p>
+      </div>
+
+      <!-- Availability Schedule -->
+      <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0" style="font-family: var(--mc-font-display); color: var(--mc-navy);">
+            <i class="bi bi-calendar3 text-primary me-2"></i>Weekly Consultation Schedule
+          </h5>
+          <span class="badge bg-light text-muted border">In-Clinic & Video Slots</span>
+        </div>
+
+        {% if availabilities %}
+          <div class="row g-3">
+            {% for slot in availabilities %}
+              <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="fw-bold text-dark d-block">
+                      <i class="bi bi-calendar-event me-2 text-primary"></i>{{ slot.get_day_of_week_display }}
+                    </span>
+                    <small class="text-muted">
+                      <i class="bi bi-clock me-1"></i>{{ slot.start_time|time:"h:i A" }} – {{ slot.end_time|time:"h:i A" }}
+                    </small>
+                  </div>
+                  <span class="badge bg-success-subtle text-success">
+                    {{ slot.slot_duration_minutes }}m slots
+                  </span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary"></i>
+            Weekly schedule is currently being updated. Please call reception or proceed to book next available slot.
+          </div>
+        {% endif %}
+      </div>
+
     </div>
 
-    <div class="card card-hospital p-4">
-      <h5 class="mb-3">Availability</h5>
-      {% if availabilities %}
-        <ul class="list-group list-group-flush">
-          {% for slot in availabilities %}
-            <li class="list-group-item">{{ slot.get_day_of_week_display }}: {{ slot.start_time }} - {{ slot.end_time }}</li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-muted">Availability not set yet. Please check with reception.</p>
-      {% endif %}
+    <!-- Booking Sidebar Column -->
+    <div class="col-lg-4">
+      <div class="card border-0 rounded-4 shadow-sm p-4 sticky-top" style="top: 90px;">
+        <h5 class="fw-bold mb-1" style="font-family: var(--mc-font-display); color: var(--mc-navy);">
+          Book Appointment
+        </h5>
+        <p class="text-muted small mb-3">Instant confirmation with dedicated slot</p>
+
+        <div class="p-3 bg-light rounded-3 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small">Consultation Fee</span>
+            <span class="fw-bold fs-4" style="color: var(--mc-navy);">₹{{ doctor.consultation_fee|floatformat:0 }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center text-muted small">
+            <span>Mode of Visit</span>
+            <span class="badge bg-white text-dark border">In-Clinic / Hospital</span>
+          </div>
+        </div>
+
+        {% if user.is_authenticated and user.is_patient_role %}
+          <a href="{% url 'appointments:book' doctor.pk %}" class="btn btn-primary btn-lg rounded-pill w-100 py-3 fw-bold mb-3 shadow">
+            <span>Select Date & Time</span>
+            <i class="bi bi-arrow-right ms-2"></i>
+          </a>
+        {% elif user.is_authenticated %}
+          <div class="alert alert-warning rounded-3 small text-center mb-3">
+            <i class="bi bi-info-circle me-1"></i>You are logged in as a {{ user.get_role_display }}. Only patient accounts can book appointments.
+          </div>
+        {% else %}
+          <a href="{% url 'accounts:login' %}?next={% url 'doctors:detail' doctor.pk %}" class="btn btn-primary btn-lg rounded-pill w-100 py-3 fw-bold mb-3 shadow">
+            <span>Login to Book Slot</span>
+            <i class="bi bi-box-arrow-in-right ms-2"></i>
+          </a>
+          <p class="text-center small text-muted mb-0">
+            Don't have an account? <a href="{% url 'accounts:register' %}" class="fw-bold text-primary">Register free</a>
+          </p>
+        {% endif %}
+
+        <hr class="my-4">
+
+        <!-- Assurance List -->
+        <div class="d-flex flex-column gap-2 small text-muted">
+          <div>
+            <i class="bi bi-shield-check text-success me-2 fs-6"></i>
+            100% Certified Healthcare Practitioner
+          </div>
+          <div>
+            <i class="bi bi-calendar2-check text-primary me-2 fs-6"></i>
+            Instant Slot Confirmation via SMS & Email
+          </div>
+          <div>
+            <i class="bi bi-arrow-counterclockwise text-info me-2 fs-6"></i>
+            Free Rescheduling up to 2 hours prior
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
-  <div class="col-md-4">
-    <div class="card card-hospital p-4 text-center">
-      <h5>Ready to book?</h5>
-      {% if user.is_authenticated and user.is_patient_role %}
-        <a href="{% url 'appointments:book' doctor.pk %}" class="btn btn-primary mt-2">Book Appointment</a>
-      {% elif user.is_authenticated %}
-        <p class="text-muted small">Only patients can book appointments.</p>
-      {% else %}
-        <a href="{% url 'accounts:login' %}" class="btn btn-primary mt-2">Login to Book</a>
-      {% endif %}
-    </div>
-  </div>
-</div>
+
+</section>
 {% endblock %}

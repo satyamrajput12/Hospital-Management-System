@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Edit Doctor Profile — Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+          <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-bold mb-1">
+              PHYSICIAN PROFILE
+            </span>
+            <h3 class="fw-bold mb-0">Edit Doctor Profile</h3>
+          </div>
+          <a href="{% url 'doctors:availability_manage' %}" class="btn btn-outline-primary rounded-pill px-3 small">
+            ⏰ Manage Schedule
+          </a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">First Name <span class="text-danger">*</span></label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Last Name <span class="text-danger">*</span></label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Contact Phone</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Consultation Fee (₹) <span class="text-danger">*</span></label>
+              {{ form.consultation_fee }}
+              {% if form.consultation_fee.errors %}<div class="text-danger small mt-1">{{ form.consultation_fee.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Clinical Specialization <span class="text-danger">*</span></label>
+              {{ form.specialization }}
+              {% if form.specialization.errors %}<div class="text-danger small mt-1">{{ form.specialization.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Qualifications / Degrees</label>
+              {{ form.qualification }}
+              {% if form.qualification.errors %}<div class="text-danger small mt-1">{{ form.qualification.errors.0 }}</div>{% endif %}
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Years of Experience</label>
+              {{ form.experience_years }}
+              {% if form.experience_years.errors %}<div class="text-danger small mt-1">{{ form.experience_years.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-dark">Profile Picture</label>
+              {{ form.profile_picture }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Clinic / Chamber Address</label>
+            {{ form.address }}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-dark">Professional Biography</label>
+            {{ form.bio }}
+          </div>
+
+          <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+              Save Doctor Profile
+            </button>
+            <a href="{% url 'core:doctor_dashboard' %}" class="text-muted small text-decoration-none">
+              Cancel
+            </a>
+          </div>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Search Results for "{{ query }}" — Medicare{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  
+  <!-- Search Header -->
+  <div class="mb-4">
+    <h2 class="fw-bold mb-1">Search Healthcare</h2>
+    <p class="text-muted">
+      {% if query %}
+        Found <strong>{{ total_results }}</strong> result{{ total_results|pluralize }} matching "<strong>{{ query }}</strong>"
+      {% else %}
+        Enter a keyword above to find doctors, clinical departments, lab tests, and pharmacy products.
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- Big Inline Search Bar -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-5 bg-white">
+    <form method="get" action="{% url 'core:search' %}" class="row g-2 align-items-center">
+      <div class="col-md-10">
+        <div class="input-group">
+          <span class="input-group-text bg-transparent border-0 ps-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          </span>
+          <input type="text" name="q" value="{{ query }}" class="form-control border-0 shadow-none ps-2" placeholder="Search by doctor name, specialty, medicine, or diagnostic test..." autofocus>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-semibold">
+          Search
+        </button>
+      </div>
+    </form>
+  </div>
+
+  {% if total_results > 0 %}
+    
+    <!-- 1. Doctors Section -->
+    {% if doctors %}
+      <div class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h4 class="fw-bold mb-0">🩺 Doctors & Specialists ({{ doctors.count }})</h4>
+          <a href="{% url 'doctors:list' %}" class="small text-decoration-none fw-semibold">View All Doctors ➔</a>
+        </div>
+        <div class="row g-3">
+          {% for doc in doctors %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-column">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  {% if doc.user.profile_picture %}
+                    <img src="{{ doc.user.profile_picture.url }}" alt="{{ doc }}" class="rounded-circle" style="width: 54px; height: 54px; object-fit: cover;">
+                  {% else %}
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                      Dr
+                    </div>
+                  {% endif %}
+                  <div>
+                    <h5 class="fw-bold mb-0">Dr. {{ doc.user.get_full_name }}</h5>
+                    <div class="text-primary small fw-semibold">{{ doc.specialization }}</div>
+                    <div class="text-muted small">{{ doc.department.name }} &middot; {{ doc.experience_years }} yrs exp</div>
+                  </div>
+                </div>
+                <p class="small text-muted flex-grow-1 mb-3">{{ doc.bio|truncatewords:15 }}</p>
+                <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                  <span class="fw-bold text-dark">₹{{ doc.consultation_fee }}</span>
+                  <a href="{% url 'appointments:book' doc.pk %}" class="btn btn-sm btn-primary rounded-pill px-3">
+                    Book Consult
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- 2. Lab Tests Section -->
+    {% if lab_tests %}
+      <div class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h4 class="fw-bold mb-0">🧪 Diagnostic Lab Tests ({{ lab_tests.count }})</h4>
+          <a href="{% url 'departments:lab_test_list' %}" class="small text-decoration-none fw-semibold">View All Tests ➔</a>
+        </div>
+        <div class="row g-3">
+          {% for test in lab_tests %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card h-100 border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-column">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2 py-1">{{ test.sample_type }}</span>
+                  <span class="small text-muted">⏱ {{ test.duration }}</span>
+                </div>
+                <h5 class="fw-bold mb-1">{{ test.name }}</h5>
+                <p class="small text-muted flex-grow-1">{{ test.description|truncatewords:12 }}</p>
+                <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                  <div>
+                    <span class="fw-bold text-dark">₹{{ test.effective_price }}</span>
+                    {% if test.discount_price and test.discount_price < test.price %}
+                      <span class="small text-muted text-decoration-line-through ms-1">₹{{ test.price }}</span>
+                    {% endif %}
+                  </div>
+                  <a href="{% url 'departments:book_lab_test' test.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                    Book Test
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- 3. Pharmacy Products Section -->
+    {% if products %}
+      <div class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h4 class="fw-bold mb-0">💊 Pharmacy & Health Products ({{ products.count }})</h4>
+          <a href="{% url 'core:pharmacy_list' %}" class="small text-decoration-none fw-semibold">View All Pharmacy ➔</a>
+        </div>
+        <div class="row g-3">
+          {% for prod in products %}
+            <div class="col-md-6 col-lg-3">
+              <div class="card h-100 border-0 shadow-sm rounded-4 p-3 bg-white d-flex flex-column">
+                <div class="text-center py-2 mb-2">
+                  <img src="{% if prod.image %}{{ prod.image.url }}{% elif prod.image_url_fallback %}{{ prod.image_url_fallback }}{% else %}{% static 'images/prod_1.jpg' %}{% endif %}" alt="{{ prod.name }}" style="max-height: 120px; object-fit: contain;">
+                </div>
+                <div class="small text-muted">{{ prod.category.name|default:"Healthcare" }}</div>
+                <h6 class="fw-bold text-dark mb-2 flex-grow-1">
+                  <a href="{% url 'core:product_detail' prod.pk %}" class="text-dark text-decoration-none">{{ prod.name }}</a>
+                </h6>
+                <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                  <div>
+                    <span class="fw-bold text-dark">₹{{ prod.effective_price }}</span>
+                    {% if prod.discount_percent > 0 %}
+                      <span class="small text-muted text-decoration-line-through">₹{{ prod.price }}</span>
+                    {% endif %}
+                  </div>
+                  <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" onclick="addToCart({{ prod.pk }}, '{{ prod.name|escapejs }}', {{ prod.effective_price }})">
+                    + Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- 4. Departments Section -->
+    {% if departments %}
+      <div class="mb-4">
+        <h4 class="fw-bold mb-3 border-bottom pb-2">🏥 Hospital Departments ({{ departments.count }})</h4>
+        <div class="row g-3">
+          {% for dept in departments %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <h5 class="fw-bold mb-1">
+                  <a href="{% url 'departments:detail' dept.pk %}" class="text-dark text-decoration-none">{{ dept.name }}</a>
+                </h5>
+                <p class="small text-muted mb-2">{{ dept.description|truncatewords:15 }}</p>
+                <a href="{% url 'departments:detail' dept.pk %}" class="small text-primary text-decoration-none fw-semibold">View Specialists & Services ➔</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+  {% elif query %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+      <div style="font-size: 3.5rem;">🔍</div>
+      <h4 class="fw-bold mt-3">No matching healthcare records found</h4>
+      <p class="text-muted">We couldn't find any doctors, tests, or medicines matching "{{ query }}".</p>
+      <div class="d-flex justify-content-center gap-2 mt-4">
+        <a href="{% url 'doctors:list' %}" class="btn btn-outline-primary rounded-pill px-4">Browse Doctors</a>
+        <a href="{% url 'core:pharmacy_list' %}" class="btn btn-outline-secondary rounded-pill px-4">Browse Pharmacy</a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

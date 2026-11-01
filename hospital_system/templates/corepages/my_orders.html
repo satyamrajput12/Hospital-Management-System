@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}My Orders — Medicare Pharmacy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">My Pharmacy Orders</h2>
+      <p class="text-muted mb-0">Total Orders Placed: <strong>{{ total_orders }}</strong></p>
+    </div>
+    <a href="{% url 'core:pharmacy_list' %}" class="btn btn-outline-primary rounded-pill px-3">
+      + New Order
+    </a>
+  </div>
+
+  {% if page_obj.object_list %}
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Order #</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th class="text-end pe-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in page_obj %}
+              <tr>
+                <td class="ps-4 fw-bold text-dark">#{{ order.order_number }}</td>
+                <td class="small text-muted">{{ order.created_at|date:"M d, Y, h:i A" }}</td>
+                <td>
+                  <span class="badge bg-light text-dark border rounded-pill px-2 py-1">
+                    {{ order.items.count }} item{{ order.items.count|pluralize }}
+                  </span>
+                </td>
+                <td class="fw-bold text-dark">₹{{ order.total_amount }}</td>
+                <td>
+                  {% if order.status == 'PENDING' %}
+                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 py-1">Pending</span>
+                  {% elif order.status == 'PROCESSING' %}
+                    <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2 py-1">Processing</span>
+                  {% elif order.status == 'SHIPPED' %}
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1">Shipped</span>
+                  {% elif order.status == 'DELIVERED' %}
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1">Delivered</span>
+                  {% else %}
+                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-1">Cancelled</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="small fw-semibold">{{ order.get_payment_method_display }}</span>
+                  <div class="small text-muted">({{ order.get_payment_status_display }})</div>
+                </td>
+                <td class="text-end pe-4">
+                  <div class="d-inline-flex gap-2">
+                    <a href="{% url 'core:order_detail' order.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                      Receipt
+                    </a>
+                    {% if order.can_cancel %}
+                      <form method="post" action="{% url 'core:cancel_order' order.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2" onclick="return confirm('Are you sure you want to cancel Order #{{ order.order_number }}?');">
+                          Cancel
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if page_obj.has_other_pages %}
+        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+          <span class="small text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          <ul class="pagination pagination-sm m-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link rounded-pill me-1" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% endif %}
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link rounded-pill" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+
+  {% else %}
+    <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
+      <div style="font-size: 3.5rem;">📦</div>
+      <h3 class="fw-bold mt-2">No orders placed yet</h3>
+      <p class="text-muted">You haven't ordered any pharmacy medicines or health products.</p>
+      <div>
+        <a href="{% url 'core:pharmacy_list' %}" class="btn btn-primary rounded-pill px-4 py-2">
+          Browse Certified Pharmacy
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

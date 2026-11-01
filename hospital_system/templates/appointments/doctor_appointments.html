@@ -1,36 +1,135 @@
 {% extends 'base.html' %}
-{% block title %}My Patient Appointments{% endblock %}
+{% block title %}Doctor Schedule — Medicare Portal{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h2>My Appointments</h2>
-  <form method="get" class="d-flex">
-    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-      <option value="">All Status</option>
-      {% for value, label in status_choices %}
-        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-  </form>
-</div>
-<div class="table-responsive">
-<table class="table table-hover bg-white rounded">
-  <thead>
-    <tr><th>Patient</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th></th></tr>
-  </thead>
-  <tbody>
-    {% for appt in appointments %}
-      <tr>
-        <td>{{ appt.patient.get_full_name|default:appt.patient.username }}</td>
-        <td>{{ appt.appointment_date }}</td>
-        <td>{{ appt.appointment_time }}</td>
-        <td>{{ appt.reason|truncatewords:8 }}</td>
-        <td><span class="badge badge-status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
-        <td><a href="{% url 'appointments:update_status' appt.pk %}" class="btn btn-sm btn-outline-primary">Update</a></td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="6" class="text-muted text-center py-3">No appointments yet.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="container py-5">
+  
+  <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Doctor Consultation Schedule</h2>
+      <p class="text-muted mb-0">Dr. {{ doctor.user.get_full_name }} &middot; {{ doctor.specialization }} ({{ doctor.department.name }})</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'doctors:availability_manage' %}" class="btn btn-outline-primary rounded-pill px-3">
+        ⏰ Manage Hours
+      </a>
+      <a href="{% url 'doctors:profile_edit' %}" class="btn btn-outline-secondary rounded-pill px-3">
+        🩺 Profile Settings
+      </a>
+    </div>
+  </div>
+
+  <!-- Filter & Search Bar -->
+  <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-md-6">
+        <input type="text" name="q" value="{{ query }}" class="form-control rounded-pill px-3" placeholder="Search by patient name or reason...">
+      </div>
+      <div class="col-md-4">
+        <select name="status" class="form-select rounded-pill px-3">
+          <option value="">All Appointment Statuses</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary rounded-pill px-3 flex-grow-1">Filter</button>
+        {% if query or status_filter %}
+          <a href="{% url 'appointments:doctor_appointments' %}" class="btn btn-outline-secondary rounded-pill">Reset</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  {% if page_obj.object_list %}
+    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Patient</th>
+              <th>Date & Time</th>
+              <th>Reason for Consultation</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Clinical Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for appt in page_obj %}
+              <tr>
+                <td class="ps-4">
+                  <div class="fw-bold text-dark">{{ appt.patient.get_full_name|default:appt.patient.username }}</div>
+                  <div class="small text-muted">{{ appt.patient.email }} &middot; {{ appt.patient.phone|default:"No phone" }}</div>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark">{{ appt.appointment_date|date:"M d, Y" }}</div>
+                  <div class="small text-muted">{{ appt.appointment_time|time:"h:i A" }}</div>
+                </td>
+                <td class="small text-muted" style="max-width: 200px;">
+                  {{ appt.reason|truncatewords:10 }}
+                </td>
+                <td>
+                  {% if appt.status == 'PENDING' %}
+                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 py-1">Pending</span>
+                  {% elif appt.status == 'CONFIRMED' %}
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1">Confirmed</span>
+                  {% elif appt.status == 'COMPLETED' %}
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1">Completed</span>
+                  {% else %}
+                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-1">Cancelled</span>
+                  {% endif %}
+                </td>
+                <td class="text-end pe-4">
+                  <div class="d-inline-flex gap-1 flex-wrap justify-content-end">
+                    <a href="{% url 'appointments:update_status' appt.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-2" title="Update status / Notes">
+                      Status
+                    </a>
+
+                    {% if appt.status == 'CONFIRMED' or appt.status == 'COMPLETED' %}
+                      <a href="{% url 'appointments:create_medical_record' appt.pk %}" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Add Medical Record">
+                        + Record
+                      </a>
+                      <a href="{% url 'appointments:create_prescription' appt.pk %}" class="btn btn-sm btn-outline-info rounded-pill px-2" title="Issue Prescription">
+                        + Rx
+                      </a>
+                    {% endif %}
+
+                    {% if appt.can_reschedule %}
+                      <a href="{% url 'appointments:reschedule' appt.pk %}" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="Reschedule Date/Time">
+                        Reschedule
+                      </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if page_obj.has_other_pages %}
+        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+          <span class="small text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          <ul class="pagination pagination-sm m-0">
+            {% if page_obj.has_previous %}
+              <li class="page-item"><a class="page-link rounded-pill me-1" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a></li>
+            {% endif %}
+            {% if page_obj.has_next %}
+              <li class="page-item"><a class="page-link rounded-pill" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+
+  {% else %}
+    <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
+      <div style="font-size: 3.5rem;">🩺</div>
+      <h3 class="fw-bold mt-2">No appointments found</h3>
+      <p class="text-muted">No patient visits scheduled matching your criteria.</p>
+    </div>
+  {% endif %}
+
 </div>
 {% endblock %}

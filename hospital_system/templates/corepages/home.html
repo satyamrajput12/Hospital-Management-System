@@ -288,76 +288,41 @@
     
     <div class="mc-section-header-row">
       <h2 class="mc-section-title-white">Frequently Book<br>Lab Tests</h2>
-      <a href="javascript:void(0)" class="mc-view-all-link" onclick="showToast('Browsing 150+ Certified Lab Diagnostic Tests');">
-        <span>VIEW ALL LAB TEST</span> ➔
+      <a href="{% url 'departments:lab_test_list' %}" class="mc-view-all-link">
+        <span>VIEW ALL LAB TESTS</span> ➔
       </a>
     </div>
 
     <div class="mc-lab-grid">
-
-      <!-- Lab Card 1: Imaging Tests -->
-      <div class="mc-lab-card peach">
-        <div>
-          <span class="mc-lab-badge orange">60%</span>
-          <div class="mc-lab-title">Imaging<br>tests</div>
-          <p class="mc-lab-desc">Imaging tests, such as X-rays, CT scans, and MRIs</p>
-        </div>
-        <div class="mc-lab-illustration-wrap">
-          <img src="{% static 'images/lab_1.jpg' %}" alt="Imaging tests" class="mc-lab-illustration">
-        </div>
-        <div class="mc-lab-price-row">
+      {% for test in lab_tests %}
+        <div class="mc-lab-card {% cycle 'peach' 'mint' 'yellow' %}">
           <div>
-            <span class="mc-lab-price">₹120</span>
-            <span class="mc-lab-price-old">₹140</span>
+            {% if test.discount_percentage > 0 %}
+              <span class="mc-lab-badge {% cycle 'orange' 'teal' 'yellow' %}">{{ test.discount_percentage }}% Off</span>
+            {% endif %}
+            <div class="mc-lab-title">{{ test.name }}</div>
+            <p class="mc-lab-desc">{{ test.description|truncatewords:15 }}</p>
           </div>
-          <button type="button" class="mc-lab-btn" onclick="addToCart('Imaging Tests Package', 120, '{% static 'images/lab_1.jpg' %}')">
-            Book Test
-          </button>
-        </div>
-      </div>
-
-      <!-- Lab Card 2: MRI & CT Scan -->
-      <div class="mc-lab-card mint">
-        <div>
-          <span class="mc-lab-badge teal">60%</span>
-          <div class="mc-lab-title">MRI &<br>CT Scan</div>
-          <p class="mc-lab-desc">Advanced high-resolution MRI scans & multi-slice CT diagnostics</p>
-        </div>
-        <div class="mc-lab-illustration-wrap">
-          <img src="{% static 'images/lab_2.jpg' %}" alt="MRI and CT Scan" class="mc-lab-illustration">
-        </div>
-        <div class="mc-lab-price-row">
-          <div>
-            <span class="mc-lab-price">₹120</span>
-            <span class="mc-lab-price-old">₹140</span>
+          <div class="mc-lab-illustration-wrap">
+            <img src="{% if test.image %}{{ test.image.url }}{% else %}{% cycle '/static/images/lab_1.jpg' '/static/images/lab_2.jpg' '/static/images/lab_3.jpg' %}{% endif %}" alt="{{ test.name }}" class="mc-lab-illustration">
           </div>
-          <button type="button" class="mc-lab-btn" onclick="addToCart('MRI & CT Scan', 120, '{% static 'images/lab_2.jpg' %}')">
-            Book Test
-          </button>
-        </div>
-      </div>
-
-      <!-- Lab Card 3: Orthopedists Tests -->
-      <div class="mc-lab-card yellow">
-        <div>
-          <span class="mc-lab-badge yellow">60%</span>
-          <div class="mc-lab-title">Orthopedists<br>tests</div>
-          <p class="mc-lab-desc">Orthopedists can diagnose and treat various types of back and neck pain</p>
-        </div>
-        <div class="mc-lab-illustration-wrap">
-          <img src="{% static 'images/lab_3.jpg' %}" alt="Orthopedists tests" class="mc-lab-illustration">
-        </div>
-        <div class="mc-lab-price-row">
-          <div>
-            <span class="mc-lab-price">₹120</span>
-            <span class="mc-lab-price-old">₹140</span>
+          <div class="mc-lab-price-row">
+            <div>
+              <span class="mc-lab-price">₹{{ test.effective_price }}</span>
+              {% if test.discount_price and test.discount_price < test.price %}
+                <span class="mc-lab-price-old">₹{{ test.price }}</span>
+              {% endif %}
+            </div>
+            <a href="{% url 'departments:book_lab_test' test.pk %}" class="mc-lab-btn text-decoration-none">
+              Book Test
+            </a>
           </div>
-          <button type="button" class="mc-lab-btn" onclick="addToCart('Orthopedists Health Check', 120, '{% static 'images/lab_3.jpg' %}')">
-            Book Test
-          </button>
         </div>
-      </div>
-
+      {% empty %}
+        <div class="col-12 text-center text-white py-4">
+          <p>Lab diagnostics catalog loading...</p>
+        </div>
+      {% endfor %}
     </div>
 
     <!-- =========================================================
@@ -366,97 +331,46 @@
     <div id="pharmacy-section">
       <div class="mc-deals-header-row">
         <h2 class="mc-deals-title">Todays best deals<br>for you!</h2>
-        <a href="javascript:void(0)" class="mc-view-all-link" onclick="showToast('Browsing all 2,000+ certified pharmacy products');">
+        <a href="{% url 'core:pharmacy_list' %}" class="mc-view-all-link">
           <span>SEE ALL PRODUCTS</span> ➔
         </a>
       </div>
 
       <div class="mc-products-grid">
-
-        <!-- Product 1: Dietary Supplement -->
-        <div class="mc-product-card">
-          <span class="mc-product-badge">20% Off</span>
-          <div class="mc-product-img-wrap">
-            <img src="{% static 'images/prod_1.jpg' %}" alt="Dietary Supplement" class="mc-product-img">
-          </div>
-          <div class="mc-product-meta">
-            <span class="mc-product-category">Nutrition</span>
-            <span class="mc-product-rating">★ (4.5)</span>
-          </div>
-          <h4 class="mc-product-title">Dietary Supplement Health Products</h4>
-          <div class="mc-product-footer">
-            <button type="button" class="mc-add-cart-btn" onclick="addToCart('Dietary Supplement Health Products', 64.00, '{% static 'images/prod_1.jpg' %}')">
-              <span>+</span> Add to
-            </button>
-            <div>
-              <span class="mc-product-old-price">₹80.00</span>
-              <span class="mc-product-price">₹64.00</span>
+        {% for prod in products %}
+          <div class="mc-product-card">
+            {% if prod.discount_percent > 0 %}
+              <span class="mc-product-badge">{{ prod.discount_percent }}% Off</span>
+            {% endif %}
+            <div class="mc-product-img-wrap">
+              <a href="{% url 'core:product_detail' prod.pk %}">
+                <img src="{% if prod.image %}{{ prod.image.url }}{% elif prod.image_url_fallback %}{{ prod.image_url_fallback }}{% else %}{% static 'images/prod_1.jpg' %}{% endif %}" alt="{{ prod.name }}" class="mc-product-img">
+              </a>
+            </div>
+            <div class="mc-product-meta">
+              <span class="mc-product-category">{{ prod.category.name|default:"Healthcare" }}</span>
+              <span class="mc-product-rating">★ ({{ prod.rating }})</span>
+            </div>
+            <h4 class="mc-product-title">
+              <a href="{% url 'core:product_detail' prod.pk %}" class="text-dark text-decoration-none">{{ prod.name }}</a>
+            </h4>
+            <div class="mc-product-footer">
+              <button type="button" class="mc-add-cart-btn" onclick="addToCart({{ prod.pk }}, '{{ prod.name|escapejs }}', {{ prod.effective_price }})">
+                <span>+</span> Add to
+              </button>
+              <div>
+                {% if prod.discount_percent > 0 %}
+                  <span class="mc-product-old-price">₹{{ prod.price }}</span>
+                {% endif %}
+                <span class="mc-product-price">₹{{ prod.effective_price }}</span>
+              </div>
             </div>
           </div>
-        </div>
-
-        <!-- Product 2: Nitrile Gloves -->
-        <div class="mc-product-card">
-          <div class="mc-product-img-wrap">
-            <img src="{% static 'images/prod_2.jpg' %}" alt="Nitrile Disposable Gloves" class="mc-product-img">
+        {% empty %}
+          <div class="col-12 text-center py-4">
+            <p class="text-muted">Pharmacy catalog loading...</p>
           </div>
-          <div class="mc-product-meta">
-            <span class="mc-product-category">Healthcare</span>
-            <span class="mc-product-rating">★ (4.5)</span>
-          </div>
-          <h4 class="mc-product-title">Nitrile Disposable gloves 100</h4>
-          <div class="mc-product-footer">
-            <button type="button" class="mc-add-cart-btn" onclick="addToCart('Nitrile Disposable gloves 100', 140.00, '{% static 'images/prod_2.jpg' %}')">
-              <span>+</span> Add to
-            </button>
-            <div>
-              <span class="mc-product-price">₹140.00</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product 3: Womens Multi Vitamins -->
-        <div class="mc-product-card">
-          <span class="mc-product-badge">50% Off</span>
-          <div class="mc-product-img-wrap">
-            <img src="{% static 'images/prod_3.jpg' %}" alt="Womens Multi Vitamins" class="mc-product-img">
-          </div>
-          <div class="mc-product-meta">
-            <span class="mc-product-category">Medicine</span>
-            <span class="mc-product-rating">★ (4.5)</span>
-          </div>
-          <h4 class="mc-product-title">Womens multi Vitamins A, Biotin- cranberry</h4>
-          <div class="mc-product-footer">
-            <button type="button" class="mc-add-cart-btn" onclick="addToCart('Womens multi Vitamins A, Biotin- cranberry', 80.00, '{% static 'images/prod_3.jpg' %}')">
-              <span>+</span> Add to
-            </button>
-            <div>
-              <span class="mc-product-old-price">₹160.00</span>
-              <span class="mc-product-price">₹80.00</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Product 4: Antibacterial Liquid Hand Soap -->
-        <div class="mc-product-card">
-          <div class="mc-product-img-wrap">
-            <img src="{% static 'images/prod_4.jpg' %}" alt="Antibacterial Liquid Hand Soap" class="mc-product-img">
-          </div>
-          <div class="mc-product-meta">
-            <span class="mc-product-category">Wellness</span>
-            <span class="mc-product-rating">★ (4.5)</span>
-          </div>
-          <h4 class="mc-product-title">Antibacterial Liquid Hand Soap</h4>
-          <div class="mc-product-footer">
-            <button type="button" class="mc-add-cart-btn" onclick="addToCart('Antibacterial Liquid Hand Soap', 80.00, '{% static 'images/prod_4.jpg' %}')">
-              <span>+</span> Add to
-            </button>
-            <div>
-              <span class="mc-product-price">₹80.00</span>
-            </div>
-          </div>
-        </div>
-
+        {% endfor %}
       </div>
     </div>
 

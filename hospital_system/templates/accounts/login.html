@@ -1,29 +1,1015 @@
-{% extends 'base.html' %}
-{% block title %}Login | City Care Hospital{% endblock %}
-{% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-5">
-    <div class="card card-hospital p-4">
-      <h3 class="mb-3 text-center">Welcome Back</h3>
-      <form method="post">
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
-        {% endif %}
-        <div class="mb-3">
-          <label class="form-label">Username</label>
-          {{ form.username.errors }}
-          <input type="text" name="username" class="form-control" required autofocus>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital Portal Login | Medicare Multi-Speciality Hospital</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --navy-900: #0a1329;
+      --navy-800: #0f1e3d;
+      --navy-700: #1e293b;
+      --emergency-red: #ef4444;
+      --emergency-red-dark: #dc2626;
+      --emergency-red-bg: #fef2f2;
+      --teal-500: #06b6d4;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --radius-lg: 24px;
+      --radius-md: 14px;
+      --radius-sm: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #091326 0%, #0d213f 50%, #102a4e 100%);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Medical Background Elements */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ambient-circle-1 {
+      position: absolute;
+      top: -10%;
+      left: -5%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(2, 132, 199, 0.22) 0%, transparent 70%);
+      filter: blur(50px);
+    }
+
+    .ambient-circle-2 {
+      position: absolute;
+      bottom: -15%;
+      right: -5%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.15) 0%, transparent 70%);
+      filter: blur(60px);
+    }
+
+    .ambient-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* TOP EMERGENCY & AMBULANCE HEADER */
+    .emergency-topbar {
+      position: relative;
+      z-index: 20;
+      background: rgba(10, 19, 41, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 0;
+    }
+
+    .emergency-pulse-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fecaca;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 50px;
+      letter-spacing: 0.3px;
+    }
+
+    .siren-dot {
+      width: 10px;
+      height: 10px;
+      background-color: var(--emergency-red);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--emergency-red);
+      animation: sirenBlink 0.9s infinite alternate;
+    }
+
+    @keyframes sirenBlink {
+      0% { opacity: 0.3; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1.25); filter: drop-shadow(0 0 8px #ef4444); }
+    }
+
+    .ambulance-dial {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 800;
+      background: var(--emergency-red-dark);
+      padding: 4px 12px;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ambulance-dial:hover {
+      background: #b91c1c;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+    }
+
+    .topbar-info {
+      color: #94a3b8;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .back-home-link:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      transform: translateX(-3px);
+    }
+
+    /* MAIN CONTAINER */
+    .portal-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .portal-card {
+      width: 100%;
+      max-width: 1100px;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      display: flex;
+      overflow: hidden;
+      min-height: 640px;
+    }
+
+    /* LEFT HERO: AMBULANCE & HOSPITAL SHOWCASE */
+    .portal-hero {
+      flex: 1.15;
+      background: linear-gradient(180deg, rgba(8, 24, 48, 0.82) 0%, rgba(9, 19, 39, 0.94) 100%),
+                  url("{% static 'images/hospital_ambulance.jpg' %}") center/cover no-repeat;
+      position: relative;
+      padding: 44px 38px;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .hero-top-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      padding: 7px 16px;
+      border-radius: 50px;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #fca5a5;
+      backdrop-filter: blur(8px);
+      width: fit-content;
+    }
+
+    .hero-content {
+      margin-top: auto;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 14.5px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+
+    /* ECG HEARTBEAT ANIMATION */
+    .ecg-wrapper {
+      margin: 16px 0;
+      padding: 10px 14px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .ecg-svg {
+      width: 140px;
+      height: 32px;
+    }
+
+    .ecg-path {
+      stroke: #38bdf8;
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: ecgDraw 2.2s linear infinite;
+    }
+
+    @keyframes ecgDraw {
+      0% { stroke-dashoffset: 200; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    .ecg-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    .ecg-text strong {
+      color: #38bdf8;
+      display: block;
+      font-size: 13px;
+    }
+
+    /* AMBULANCE SERVICE CARD */
+    .ambulance-feature-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .ambulance-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .ambulance-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f87171;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ambulance-eta {
+      font-size: 12px;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #86efac;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .ambulance-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 12px;
+    }
+
+    .stat-box {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.2;
+    }
+
+    /* RIGHT FORM PANEL */
+    .portal-form-side {
+      flex: 1;
+      padding: 44px 42px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Hospital Logo / Branding */
+    .portal-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      text-decoration: none;
+    }
+
+    .brand-icon-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 22px;
+      box-shadow: 0 8px 18px rgba(2, 132, 199, 0.3);
+    }
+
+    .brand-text h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy-900);
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .brand-text span {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .form-heading {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy-900);
+      margin-bottom: 4px;
+    }
+
+    .form-desc {
+      color: var(--text-muted);
+      font-size: 13.5px;
+      margin-bottom: 20px;
+    }
+
+    /* INTERACTIVE ROLE SWITCHER / PRE-FILL TABS */
+    .role-tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+      margin-bottom: 22px;
+    }
+
+    .role-tab {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 8px 6px;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #64748b;
+      border-radius: 9px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .role-tab:hover {
+      color: var(--navy-900);
+    }
+
+    .role-tab.active {
+      background: #ffffff;
+      color: var(--primary-dark);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Role Notification Tooltip */
+    .role-hint {
+      display: none;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .role-hint.show {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* FORM GROUPS */
+    .form-group-custom {
+      margin-bottom: 18px;
+    }
+
+    .form-label-custom {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy-700);
+      margin-bottom: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      color: #94a3b8;
+      font-size: 16px;
+      pointer-events: none;
+      transition: color 0.2s ease;
+    }
+
+    .form-control-custom {
+      width: 100%;
+      height: 48px;
+      padding: 10px 42px 10px 42px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 14px;
+      color: var(--text-main);
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .form-control-custom:focus {
+      background: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      outline: none;
+    }
+
+    .form-control-custom:focus ~ .input-icon {
+      color: var(--primary);
+    }
+
+    .pw-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 17px;
+      cursor: pointer;
+      padding: 4px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s ease;
+    }
+
+    .pw-toggle-btn:hover {
+      color: var(--navy-900);
+    }
+
+    /* Alerts */
+    .alert-custom {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #991b1b;
+      font-size: 13px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .remember-check {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .forgot-pw-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      transition: color 0.2s ease;
+    }
+
+    .forgot-pw-link:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    /* SUBMIT BUTTON */
+    .btn-portal-submit {
+      width: 100%;
+      height: 50px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 22px rgba(2, 132, 199, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .btn-portal-submit:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(2, 132, 199, 0.45);
+    }
+
+    .btn-portal-submit:active {
+      transform: translateY(0);
+    }
+
+    /* FOOTER LINKS */
+    .portal-footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    .portal-footer a {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .portal-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* EMERGENCY NOTICE BOX */
+    .emergency-footer-notice {
+      margin-top: 20px;
+      background: #fff1f2;
+      border: 1px dashed #fca5a5;
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .emergency-footer-notice .hotline {
+      font-weight: 800;
+      color: #dc2626;
+      font-size: 14px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 991px) {
+      .portal-card {
+        flex-direction: column;
+        max-width: 580px;
+      }
+
+      .portal-hero {
+        padding: 30px 24px;
+        min-height: 380px;
+      }
+
+      .portal-form-side {
+        padding: 32px 24px;
+      }
+
+      .ambulance-stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .topbar-info {
+        display: none;
+      }
+      .emergency-topbar .container-fluid {
+        justify-content: space-between;
+      }
+      .portal-card {
+        border-radius: 18px;
+      }
+      .hero-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background glow elements -->
+  <div class="ambient-bg">
+    <div class="ambient-circle-1"></div>
+    <div class="ambient-circle-2"></div>
+    <div class="ambient-grid"></div>
+  </div>
+
+  <!-- TOP EMERGENCY AMBULANCE BAR -->
+  <div class="emergency-topbar">
+    <div class="container-fluid px-3 px-md-4 d-flex align-items-center justify-content-between">
+      
+      <!-- Left: 24x7 Ambulance SOS -->
+      <div class="d-flex align-items-center gap-2 gap-md-3">
+        <div class="emergency-pulse-badge">
+          <span class="siren-dot"></span>
+          <span>24/7 AMBULANCE</span>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Password</label>
-          {{ form.password.errors }}
-          <input type="password" name="password" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Login</button>
-      </form>
-      <p class="text-center mt-3 mb-0 small">Don't have an account? <a href="{% url 'accounts:register' %}">Register as Patient</a></p>
+        <a href="tel:108" class="ambulance-dial">
+          <i class="bi bi-telephone-fill"></i> DIAL 108 / 102
+        </a>
+      </div>
+
+      <!-- Center: Emergency Fleet Status -->
+      <div class="topbar-info">
+        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> Central Wing & Trauma Center</span>
+        <span><i class="bi bi-shield-check text-info me-1"></i> NABH Accredited</span>
+        <span><i class="bi bi-clock-history text-warning me-1"></i> Avg Response: 8 mins</span>
+      </div>
+
+      <!-- Right: Back to Home -->
+      <div>
+        <a href="{% url 'core:home' %}" class="back-home-link">
+          <i class="bi bi-arrow-left"></i>
+          <span>Back to Home</span>
+        </a>
+      </div>
+
     </div>
   </div>
-</div>
-{% endblock %}
+
+  <!-- MAIN AUTHENTICATION CONTAINER -->
+  <main class="portal-main">
+    <div class="portal-card">
+
+      <!-- LEFT SIDE: HOSPITAL & AMBULANCE COMMAND HERO -->
+      <div class="portal-hero">
+        
+        <!-- Live Emergency Indicator -->
+        <div class="hero-top-badge">
+          <span class="siren-dot"></span>
+          <span>HOSPITAL EMERGENCY TRAUMA CARE • ACTIVE</span>
+        </div>
+
+        <div class="hero-content">
+          <h1 class="hero-title">
+            World-Class Care, <span>Ready 24/7</span>
+          </h1>
+          <p class="hero-subtitle">
+            Welcome to the Medicare Healthcare & Emergency Portal. Fast-track appointment bookings, real-time ambulance dispatch, and 24/7 critical care monitoring.
+          </p>
+
+          <!-- Animated Heartbeat ECG Line -->
+          <div class="ecg-wrapper">
+            <svg class="ecg-svg" viewBox="0 0 160 32">
+              <path class="ecg-path" d="M 0,16 L 30,16 L 38,4 L 46,28 L 54,8 L 62,22 L 70,16 L 100,16 L 108,6 L 116,26 L 124,12 L 132,20 L 140,16 L 160,16" />
+            </svg>
+            <div class="ecg-text">
+              <strong>Heartbeat & Vitals Monitor</strong>
+              <span>Level-1 Trauma & Emergency Care</span>
+            </div>
+          </div>
+
+          <!-- Ambulance Fleet Showcase Card -->
+          <div class="ambulance-feature-card">
+            <div class="ambulance-header">
+              <span class="ambulance-tag">
+                <i class="bi bi-truck-front-fill fs-5"></i>
+                <span>ICU-ON-WHEELS AMBULANCE</span>
+              </span>
+              <span class="ambulance-eta">
+                <i class="bi bi-lightning-charge-fill me-1"></i> Rapid Dispatch
+              </span>
+            </div>
+
+            <p class="text-white-50 small mb-0">
+              Equipped with Portable Ventilator, Automated External Defibrillator (AED), Cardiac Monitors & Certified Paramedics.
+            </p>
+
+            <div class="ambulance-stats">
+              <div class="stat-box">
+                <div class="stat-num">12+</div>
+                <div class="stat-label">Ambulances Ready</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-num">50+</div>
+                <div class="stat-label">Specialist Doctors</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-num">15K+</div>
+                <div class="stat-label">Patients Healed</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Trust footer -->
+        <div class="d-flex align-items-center justify-content-between text-white-50 small">
+          <span><i class="bi bi-lock-fill text-info me-1"></i> 256-Bit SSL Encrypted Health Portal</span>
+          <span>Emergency Helpline: <strong>1800-419-1100</strong></span>
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDE: PORTAL LOGIN FORM -->
+      <div class="portal-form-side">
+
+        <!-- Hospital Brand Header -->
+        <a href="{% url 'core:home' %}" class="portal-brand">
+          <div class="brand-icon-box">
+            <i class="bi bi-hospital"></i>
+          </div>
+          <div class="brand-text">
+            <h4>Medicare Hospital</h4>
+            <span>Official Portal Access</span>
+          </div>
+        </a>
+
+        <h2 class="form-heading">Welcome Back</h2>
+        <p class="form-desc">Please log in to manage your appointments, consultations, or patient records.</p>
+
+        <!-- Fast Role Switcher & Pre-fill Demo -->
+        <div class="role-tabs">
+          <button type="button" class="role-tab active" id="tabPatient" onclick="selectRole('patient')">
+            <i class="bi bi-person-fill"></i> Patient
+          </button>
+          <button type="button" class="role-tab" id="tabDoctor" onclick="selectRole('doctor')">
+            <i class="bi bi-person-badge-fill"></i> Doctor
+          </button>
+          <button type="button" class="role-tab" id="tabAdmin" onclick="selectRole('admin')">
+            <i class="bi bi-shield-lock-fill"></i> Admin
+          </button>
+        </div>
+
+        <!-- Role Helper Tooltip -->
+        <div class="role-hint" id="roleHint">
+          <i class="bi bi-info-circle-fill"></i>
+          <span id="roleHintText">Prefilled credentials for quick demonstration!</span>
+        </div>
+
+        <!-- Django Messages & Error Handling -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show py-2 small" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        {% if form.errors or form.non_field_errors %}
+          <div class="alert-custom">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <div>
+              {% if form.non_field_errors %}
+                {{ form.non_field_errors.0 }}
+              {% elif form.password.errors %}
+                {{ form.password.errors.0 }}
+              {% elif form.username.errors %}
+                {{ form.username.errors.0 }}
+              {% else %}
+                The username or password you entered is incorrect.
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- LOGIN FORM -->
+        <form method="post" id="loginForm" novalidate>
+          {% csrf_token %}
+
+          <!-- Username / Email Field -->
+          <div class="form-group-custom">
+            <label class="form-label-custom" for="id_username">Username or Email</label>
+            <div class="input-wrapper">
+              <i class="bi bi-person input-icon"></i>
+              <input type="text" 
+                     name="username" 
+                     id="id_username" 
+                     class="form-control-custom" 
+                     placeholder="e.g. rahul@example.com or admin" 
+                     value="{{ form.username.value|default:'' }}" 
+                     required 
+                     autofocus>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group-custom">
+            <label class="form-label-custom" for="id_password">Password</label>
+            <div class="input-wrapper">
+              <i class="bi bi-lock input-icon"></i>
+              <input type="password" 
+                     name="password" 
+                     id="id_password" 
+                     class="form-control-custom" 
+                     placeholder="Enter your account password" 
+                     required>
+              <button type="button" 
+                      class="pw-toggle-btn" 
+                      id="togglePassword" 
+                      title="Show or hide password">
+                <i class="bi bi-eye" id="eyeIcon"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Form Options (Remember me & Forgot Password) -->
+          <div class="form-options">
+            <label class="remember-check">
+              <input type="checkbox" name="remember_me" class="form-check-input" checked>
+              <span>Remember me</span>
+            </label>
+            <a href="{% url 'accounts:password_reset' %}" class="forgot-pw-link">Forgot Password?</a>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-portal-submit">
+            <span>Sign In to Hospital Portal</span>
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </form>
+
+        <!-- Emergency Booking Callout Strip -->
+        <div class="emergency-footer-notice">
+          <div>
+            <i class="bi bi-truck-front text-danger me-1"></i>
+            <span>Need Immediate Ambulance?</span>
+          </div>
+          <a href="tel:108" class="hotline text-decoration-none">
+            <i class="bi bi-telephone-outbound-fill me-1"></i> Call 108
+          </a>
+        </div>
+
+        <!-- Registration Link -->
+        <div class="portal-footer">
+          <span>Are you a new patient?</span>
+          <a href="{% url 'accounts:register' %}" class="ms-1 fw-bold">Create Free Patient Account</a>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    // Password toggle
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('id_password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    toggleBtn.addEventListener('click', function () {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.className = 'bi bi-eye-slash';
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.className = 'bi bi-eye';
+      }
+    });
+
+    // Interactive role demo switcher
+    function selectRole(role) {
+      document.querySelectorAll('.role-tab').forEach(tab => tab.classList.remove('active'));
+      const hint = document.getElementById('roleHint');
+      const hintText = document.getElementById('roleHintText');
+      const usernameInput = document.getElementById('id_username');
+      const passwordInput = document.getElementById('id_password');
+
+      if (role === 'doctor') {
+        document.getElementById('tabDoctor').classList.add('active');
+        usernameInput.value = 'drsharma';
+        passwordInput.value = 'Doctor@12345';
+        hintText.innerText = 'Doctor login prefilled: Dr. Sharma (drsharma)';
+        hint.classList.add('show');
+      } else if (role === 'admin') {
+        document.getElementById('tabAdmin').classList.add('active');
+        usernameInput.value = 'admin';
+        passwordInput.value = 'Admin@12345';
+        hintText.innerText = 'Admin login prefilled: Hospital Administrator (admin)';
+        hint.classList.add('show');
+      } else {
+        document.getElementById('tabPatient').classList.add('active');
+        usernameInput.value = '';
+        passwordInput.value = '';
+        usernameInput.placeholder = 'e.g. your registered username or email';
+        hint.classList.remove('show');
+      }
+    }
+  </script>
+
+</body>
+</html>
