@@ -11,7 +11,7 @@ else
 fi
 
 # 2. Ensure target static output directories exist
-mkdir -p staticfiles hospital_system/staticfiles
+mkdir -p staticfiles_build/static hospital_system/staticfiles_build/static
 
 # 3. Collect static files using Django manage.py
 if [ -f "hospital_system/manage.py" ]; then
@@ -30,17 +30,12 @@ elif [ -f "manage.py" ]; then
     fi
 fi
 
-# 4. Synchronize staticfiles across root and subdirectory
-if [ -d "hospital_system/staticfiles" ]; then
-    cp -r hospital_system/staticfiles/. staticfiles/ 2>/dev/null || true
+# 4. Synchronize staticfiles_build between root and subdirectory
+if [ -d "hospital_system/staticfiles_build/static" ]; then
+    cp -r hospital_system/staticfiles_build/static/. staticfiles_build/static/ 2>/dev/null || true
 fi
-if [ -d "staticfiles" ]; then
-    cp -r staticfiles/. hospital_system/staticfiles/ 2>/dev/null || true
+if [ -d "staticfiles_build/static" ]; then
+    cp -r staticfiles_build/static/. hospital_system/staticfiles_build/static/ 2>/dev/null || true
 fi
-
-# 5. Populate /static nested folder so both /static/ and direct routes resolve
-mkdir -p staticfiles/static hospital_system/staticfiles/static
-cp -r staticfiles/admin staticfiles/css staticfiles/images staticfiles/js staticfiles/static/ 2>/dev/null || true
-cp -r hospital_system/staticfiles/admin hospital_system/staticfiles/css hospital_system/staticfiles/images hospital_system/staticfiles/js hospital_system/staticfiles/static/ 2>/dev/null || true
 
 echo "==> Vercel build complete!"

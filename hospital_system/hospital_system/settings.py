@@ -182,7 +182,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# For Vercel deployment, place static files into staticfiles_build/static
+# so that @vercel/static-build with distDir "staticfiles_build" serves /static/... perfectly
+if (BASE_DIR.parent / 'build_files.sh').exists():
+    STATIC_ROOT = BASE_DIR.parent / 'staticfiles_build' / 'static'
+else:
+    STATIC_ROOT = BASE_DIR / 'staticfiles_build' / 'static'
+
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
 
 STORAGES = {
     "default": {
