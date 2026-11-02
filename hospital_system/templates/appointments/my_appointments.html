@@ -48,13 +48,7 @@
               <tr>
                 <td class="ps-4">
                   <div class="d-flex align-items-center gap-3">
-                    {% if appt.doctor.user.profile_picture %}
-                      <img src="{{ appt.doctor.user.profile_picture.url }}" alt="{{ appt.doctor }}" class="rounded-circle" style="width: 42px; height: 42px; object-fit: cover;">
-                    {% else %}
-                      <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; font-size: 0.9rem;">
-                        Dr
-                      </div>
-                    {% endif %}
+                    <img src="{{ appt.doctor.get_photo_url }}" alt="{{ appt.doctor }}" class="rounded-circle" style="width: 42px; height: 42px; object-fit: cover;" onerror="this.onerror=null; this.src='{% static 'images/doc_1.jpg' %}';">
                     <div>
                       <div class="fw-bold text-dark">Dr. {{ appt.doctor.user.get_full_name }}</div>
                       <div class="small text-muted">{{ appt.doctor.specialization }} &middot; {{ appt.doctor.department.name }}</div>

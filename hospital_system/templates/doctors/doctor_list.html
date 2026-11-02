@@ -211,17 +211,12 @@
             
             <div class="mc-doc-identity-row">
               <div class="mc-doc-avatar-container">
-                {% if doctor.user.profile_picture %}
-                  <img 
-                    src="{{ doctor.user.profile_picture.url }}" 
-                    alt="Dr. {{ doctor.user.get_full_name }}" 
-                    class="mc-doc-avatar-photo"
-                  >
-                {% else %}
-                  <div class="mc-doc-avatar-fallback">
-                    {{ doctor.user.first_name|first|upper }}{{ doctor.user.last_name|first|upper }}
-                  </div>
-                {% endif %}
+                <img 
+                  src="{{ doctor.get_photo_url }}" 
+                  alt="Dr. {{ doctor.user.get_full_name }}" 
+                  class="mc-doc-avatar-photo"
+                  onerror="this.onerror=null; this.src='{% static 'images/doc_1.jpg' %}';"
+                >
                 <span class="mc-doc-online-badge" title="Active & Available"></span>
               </div>
 

@@ -21,6 +21,14 @@ class Doctor(models.Model):
     class Meta:
         ordering = ['user__first_name']
 
+    @property
+    def get_photo_url(self):
+        """Returns the doctor's photo URL with guaranteed fallback to static images."""
+        if hasattr(self, 'user') and self.user:
+            return self.user.get_avatar_url()
+        from django.templatetags.static import static
+        return static('images/doc_1.jpg')
+
     def __str__(self):
         return f"Dr. {self.user.get_full_name() or self.user.username} ({self.specialization})"
 

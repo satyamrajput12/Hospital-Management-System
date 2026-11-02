@@ -252,12 +252,7 @@
     {% for doctor in doctors %}
       <div class="mc-doctor-card" data-spec="{{ doctor.specialization }}" data-name="Dr. {{ doctor.user.get_full_name }}" data-dept="{{ doctor.department.name|default:'' }}" data-symptoms="orthopedist neuro neck shoulder">
         <div class="mc-doctor-img-wrap">
-          {% if doctor.user.profile_picture %}
-            <img src="{{ doctor.user.profile_picture.url }}" alt="{{ doctor.user.get_full_name }}" class="mc-doctor-img">
-          {% else %}
-            {% cycle 'images/doc_1.jpg' 'images/doc_2.jpg' 'images/doc_3.jpg' 'images/doc_4.jpg' as doc_img silent %}
-            <img src="{% static doc_img %}" alt="{{ doctor.user.get_full_name }}" class="mc-doctor-img">
-          {% endif %}
+          <img src="{{ doctor.get_photo_url }}" alt="{{ doctor.user.get_full_name }}" class="mc-doctor-img" onerror="this.onerror=null; this.src='{% static 'images/doc_1.jpg' %}';">
         </div>
         <div class="mc-doctor-info">
           <div>
