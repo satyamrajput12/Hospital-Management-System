@@ -112,25 +112,49 @@ WSGI_APPLICATION = 'hospital_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Database
+# https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-# External production database support (PostgreSQL / Supabase / Neon via DATABASE_URL)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     try:
         import dj_database_url
-        DATABASES['default'] = dj_database_url.parse(
-            DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+        DATABASES = {
+            'default': dj_database_url.parse(
+                DATABASE_URL,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
+        }
     except Exception:
-        pass
+        DATABASE_URL = None
+
+if not DATABASE_URL:
+    # On Vercel / Serverless environments, /var/task is read-only.
+    # We use writable /tmp and automatically copy the bundled template database on cold start.
+    is_serverless = bool(os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME') or '/var/task' in str(BASE_DIR))
+    if is_serverless:
+        tmp_db = Path('/tmp/db.sqlite3')
+        template_db = BASE_DIR / 'db_template.sqlite3'
+        if not tmp_db.exists() and template_db.exists():
+            import shutil
+            try:
+                shutil.copyfile(template_db, tmp_db)
+            except Exception:
+                pass
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': tmp_db,
+            }
+        }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 
 # Password validation

@@ -17,9 +17,17 @@ mkdir -p staticfiles hospital_system/staticfiles
 if [ -f "hospital_system/manage.py" ]; then
     echo "==> Running collectstatic in hospital_system..."
     python3 hospital_system/manage.py collectstatic --noinput --clear
+    if [ -n "$DATABASE_URL" ]; then
+        echo "==> Migrating production database..."
+        python3 hospital_system/manage.py migrate --noinput
+    fi
 elif [ -f "manage.py" ]; then
     echo "==> Running collectstatic..."
     python3 manage.py collectstatic --noinput --clear
+    if [ -n "$DATABASE_URL" ]; then
+        echo "==> Migrating production database..."
+        python3 manage.py migrate --noinput
+    fi
 fi
 
 # 4. Synchronize staticfiles across root and subdirectory
