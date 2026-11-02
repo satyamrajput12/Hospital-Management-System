@@ -1,0 +1,8 @@
+{
+  "extraPaths": [
+    "hospital_system"
+  ],
+  "pythonPath": "C:\\Program Files\\Python313\\python.exe",
+  "reportMissingImports": "none"
+}
+

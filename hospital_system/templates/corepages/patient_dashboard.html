@@ -18,22 +18,6 @@
   </div>
 </div>
 
-{% if not user.is_email_verified %}
-  <div class="alert alert-warning border-0 shadow-sm d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center">
-      <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-warning"></i>
-      <div>
-        <strong>Email verification required!</strong>
-        <div class="small">Please verify your email address ({{ user.email }}) to ensure full account access.</div>
-      </div>
-    </div>
-    <form method="post" action="{% url 'accounts:resend_verification' %}">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-sm btn-outline-dark">Resend Link</button>
-    </form>
-  </div>
-{% endif %}
-
 <!-- Quick Access Services -->
 <div class="row g-3 mb-4">
   <div class="col-md-3 col-6">

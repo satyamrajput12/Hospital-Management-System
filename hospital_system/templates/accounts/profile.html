@@ -5,24 +5,6 @@
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-8">
-      
-      <!-- Email Verification Notice Banner -->
-      {% if not user.is_email_verified %}
-        <div class="alert alert-warning rounded-4 shadow-sm p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <div class="d-flex align-items-center gap-2">
-            <span style="font-size: 1.5rem;">⚠️</span>
-            <div>
-              <strong>Email Not Verified</strong>
-              <div class="small text-muted">Please verify your email address to book appointments and place orders.</div>
-            </div>
-          </div>
-          <form method="post" action="{% url 'accounts:resend_verification' %}" class="m-0">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-dark rounded-pill px-3">Resend Verification Email</button>
-          </form>
-        </div>
-      {% endif %}
-
       <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
         
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pb-3 border-bottom mb-4">

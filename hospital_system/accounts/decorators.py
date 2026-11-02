@@ -40,18 +40,9 @@ def admin_required(view_func):
 
 def verified_email_required(view_func):
     """
-    Blocks unverified accounts from performing sensitive operations
-    (booking appointments, ordering pharmacy items, etc.) until verified.
+    Pass-through decorator. Email verification is no longer required.
     """
     @wraps(view_func)
-    @login_required
     def _wrapped_view(request, *args, **kwargs):
-        if getattr(request.user, 'is_email_verified', False):
-            return view_func(request, *args, **kwargs)
-        messages.warning(
-            request,
-            "Please verify your email address to access this feature. "
-            "Check your inbox or request a new verification link from your dashboard."
-        )
-        return redirect('core:redirect_dashboard')
+        return view_func(request, *args, **kwargs)
     return _wrapped_view

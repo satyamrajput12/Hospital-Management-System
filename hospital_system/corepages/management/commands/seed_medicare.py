@@ -88,6 +88,10 @@ class Command(BaseCommand):
         cat_equipment, _ = ProductCategory.objects.get_or_create(name='Healthcare Equipment', defaults={'description': 'Clinical safety and diagnostics'})
         cat_vitamins, _ = ProductCategory.objects.get_or_create(name='Vitamins & Immunity', defaults={'description': 'Essential vitamins and minerals'})
         cat_hygiene, _ = ProductCategory.objects.get_or_create(name='Hygiene & Wellness', defaults={'description': 'Antiseptic and daily personal care'})
+        cat_fever, _ = ProductCategory.objects.get_or_create(name='Fever & Pain Relief', defaults={'description': 'Clinically approved antipyretics and analgesics for fever and pain'})
+        cat_calcium, _ = ProductCategory.objects.get_or_create(name='Calcium & Bone Health', defaults={'description': 'Elemental calcium, Vitamin D3, and joint support supplements'})
+        cat_cough, _ = ProductCategory.objects.get_or_create(name='Cough & Cold Care', defaults={'description': 'Decongestants, antihistamines, and soothing throat relief'})
+        cat_digestive, _ = ProductCategory.objects.get_or_create(name='Digestive & Gastric Care', defaults={'description': 'Antacids, proton-pump inhibitors, and digestive health'})
 
         products_data = [
             {
@@ -139,6 +143,107 @@ class Command(BaseCommand):
                 'stock': 40,
                 'rating': Decimal('4.9'),
                 'image_url_fallback': '/static/images/prod_2.jpg',
+            },
+            # 10 Added Fever, Calcium & Essential Medicines
+            {
+                'name': 'Paracetamol 650mg Fast-Action Tablets (Strip of 15)',
+                'category': cat_fever,
+                'description': 'Fast-acting antipyretic & analgesic for effective high fever reduction, mild-to-moderate headache, and muscular body ache relief.',
+                'price': Decimal('45.00'),
+                'discount_percent': 15,
+                'stock': 250,
+                'rating': Decimal('4.8'),
+                'image_url_fallback': '/static/images/prod_1.jpg',
+            },
+            {
+                'name': 'Dolo 650 Fever & Headache Relief (Strip of 15)',
+                'category': cat_fever,
+                'description': 'Doctor-recommended paracetamol formulation for viral fever, chills, body ache, and seasonal flu temperature management.',
+                'price': Decimal('35.00'),
+                'discount_percent': 10,
+                'stock': 300,
+                'rating': Decimal('4.9'),
+                'image_url_fallback': '/static/images/prod_3.jpg',
+            },
+            {
+                'name': 'Calcium 500mg + Vitamin D3 Tablets (Bottle of 60)',
+                'category': cat_calcium,
+                'description': 'High-potency elemental calcium with Vitamin D3 (Cholecalciferol) to support bone mineral density, joint strength, and prevent osteoporosis.',
+                'price': Decimal('180.00'),
+                'discount_percent': 25,
+                'stock': 140,
+                'rating': Decimal('4.8'),
+                'image_url_fallback': '/static/images/prod_1.jpg',
+            },
+            {
+                'name': 'Shelcal-HD Calcium & Mineral Syrup (200ml)',
+                'category': cat_calcium,
+                'description': 'Pediatric & adult liquid calcium supplement fortified with Magnesium, Zinc, and Vitamin D3 for optimal skeletal absorption.',
+                'price': Decimal('165.00'),
+                'discount_percent': 20,
+                'stock': 95,
+                'rating': Decimal('4.7'),
+                'image_url_fallback': '/static/images/prod_4.jpg',
+            },
+            {
+                'name': 'Ibuprofen 400mg Anti-Inflammatory Tablets (Strip of 10)',
+                'category': cat_fever,
+                'description': 'Fast anti-inflammatory and pain reducer for acute fever, migraine, toothache, muscle sprains, and joint discomfort.',
+                'price': Decimal('55.00'),
+                'discount_percent': 15,
+                'stock': 180,
+                'rating': Decimal('4.6'),
+                'image_url_fallback': '/static/images/prod_3.jpg',
+            },
+            {
+                'name': 'Cetirizine 10mg Allergy & Cold Relief (Strip of 10)',
+                'category': cat_cough,
+                'description': 'Rapid 24-hour relief from runny nose, sneezing, pollen allergy, watery eyes, and allergic skin hives.',
+                'price': Decimal('40.00'),
+                'discount_percent': 20,
+                'stock': 210,
+                'rating': Decimal('4.7'),
+                'image_url_fallback': '/static/images/prod_2.jpg',
+            },
+            {
+                'name': 'Vitamin C 1000mg + Zinc Effervescent Tablets (Tube of 20)',
+                'category': cat_vitamins,
+                'description': 'Delicious orange effervescent antioxidant drink providing daily immune protection, energy, and viral defense.',
+                'price': Decimal('290.00'),
+                'discount_percent': 30,
+                'stock': 160,
+                'rating': Decimal('4.9'),
+                'image_url_fallback': '/static/images/prod_1.jpg',
+            },
+            {
+                'name': 'Pantoprazole DSR Gastro-Resistant Capsules (Strip of 10)',
+                'category': cat_digestive,
+                'description': 'Relieves hyperacidity, acid reflux, heartburn, GERD, nausea, and morning sickness with enteric-coated pellets.',
+                'price': Decimal('145.00'),
+                'discount_percent': 20,
+                'stock': 150,
+                'rating': Decimal('4.8'),
+                'image_url_fallback': '/static/images/prod_3.jpg',
+            },
+            {
+                'name': 'Oral Rehydration Salts (ORS) Probiotic Sachet (Pack of 5)',
+                'category': cat_hygiene,
+                'description': 'WHO-standard electrolyte formula with active probiotics to restore fluid balance during high fever, dehydration, and vomiting.',
+                'price': Decimal('65.00'),
+                'discount_percent': 15,
+                'stock': 320,
+                'rating': Decimal('4.9'),
+                'image_url_fallback': '/static/images/prod_2.jpg',
+            },
+            {
+                'name': 'Herbal Cough & Sore Throat Lozenges (Honey Ginger, Pack of 24)',
+                'category': cat_cough,
+                'description': 'Soothing Ayurvedic herbal lozenges enriched with Tulsi, Ginger, Honey, and Mulethi to calm throat scratchiness and persistent dry cough.',
+                'price': Decimal('50.00'),
+                'discount_percent': 10,
+                'stock': 220,
+                'rating': Decimal('4.8'),
+                'image_url_fallback': '/static/images/prod_4.jpg',
             },
         ]
         for pd in products_data:

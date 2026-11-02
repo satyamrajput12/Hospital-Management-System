@@ -1,0 +1,20 @@
+# Pyrefly Type Checker Configuration
+python-interpreter-path = "C:\\Program Files\\Python313\\python.exe"
+
+search-path = [
+    "hospital_system",
+    "."
+]
+
+site-package-path = [
+    "C:\\Users\\satya\\AppData\\Roaming\\Python\\Python313\\site-packages",
+    "C:\\Program Files\\Python313\\Lib\\site-packages"
+]
+
+[errors]
+missing-import = "ignore"
+untyped-import = "ignore"
+missing-attribute = "ignore"
+bad-override = "ignore"
+bad-override-mutable-attribute = "ignore"
+bad-assignment = "ignore"

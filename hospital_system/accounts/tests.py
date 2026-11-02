@@ -48,7 +48,6 @@ class AuthenticationAndSecurityTests(TestCase):
     def test_patient_registration_success_and_email_dispatched(self):
         url = reverse('accounts:register')
         data = {
-            'username': 'newpatient',
             'first_name': 'Jane',
             'last_name': 'Doe',
             'email': 'jane.doe@example.com',
@@ -59,18 +58,15 @@ class AuthenticationAndSecurityTests(TestCase):
         response = self.client.post(url, data)
         self.assertRedirects(response, reverse('corepages:redirect_dashboard'), target_status_code=302)
         
-        user = User.objects.get(username='newpatient')
+        user = User.objects.get(email='jane.doe@example.com')
         self.assertEqual(user.role, User.Role.PATIENT)
-        self.assertFalse(user.is_email_verified)
+        self.assertEqual(user.username, 'jane.doe@example.com')
+        self.assertTrue(user.is_email_verified)
         self.assertTrue(user.is_active)
-        # Verify an activation email was sent
-        self.assertGreaterEqual(len(mail.outbox), 1)
-        self.assertIn('Verify your Medicare', mail.outbox[0].subject)
 
     def test_registration_prevents_role_escalation(self):
         url = reverse('accounts:register')
         data = {
-            'username': 'hacker',
             'first_name': 'Bad',
             'last_name': 'Actor',
             'email': 'hacker@example.com',
@@ -81,7 +77,7 @@ class AuthenticationAndSecurityTests(TestCase):
             'is_superuser': True,
         }
         self.client.post(url, data)
-        user = User.objects.get(username='hacker')
+        user = User.objects.get(email='hacker@example.com')
         self.assertEqual(user.role, User.Role.PATIENT)
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)

@@ -1,9 +1,12 @@
 import time
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.views import (
-    LoginView, LogoutView,
+    LoginView,
     PasswordResetView, PasswordResetDoneView,
     PasswordResetConfirmView, PasswordResetCompleteView,
     PasswordChangeView, PasswordChangeDoneView
@@ -45,12 +48,16 @@ class HospitalLoginView(LoginView):
         return reverse_lazy('core:redirect_dashboard')
 
 
-class HospitalLogoutView(LogoutView):
-    next_page = 'core:home'
-
-    def get(self, request, *args, **kwargs):
-        # Support safe GET logout as fallback with confirmation/redirect
-        return self.post(request, *args, **kwargs)
+@method_decorator(csrf_exempt, name='dispatch')
+class HospitalLogoutView(View):
+    """
+    Robust logout view that handles both GET and POST requests safely
+    and bypasses stale CSRF token mismatches across multiple tabs.
+    """
+    def dispatch(self, request, *args, **kwargs):
+        auth_logout(request)
+        messages.info(request, "You have been successfully signed out.")
+        return redirect('core:home')
 
 
 def register_patient(request):
@@ -62,21 +69,10 @@ def register_patient(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            
-            # Send verification email
-            sent = send_verification_email(request, user)
-            if sent:
-                messages.success(
-                    request,
-                    f'Registration successful! A verification email has been sent to {user.email}. '
-                    'Please verify your email address to enable appointment booking and orders.'
-                )
-            else:
-                messages.warning(
-                    request,
-                    'Registration successful, but we could not send the verification email right now. '
-                    'You can resend it from your dashboard.'
-                )
+            messages.success(
+                request,
+                f'Registration successful! Welcome to Medicare Hospital, {user.first_name or user.username}.'
+            )
             return redirect('core:redirect_dashboard')
     else:
         form = PatientRegistrationForm()

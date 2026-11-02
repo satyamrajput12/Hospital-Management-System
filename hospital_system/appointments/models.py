@@ -10,6 +10,8 @@ class Appointment(models.Model):
         COMPLETED = 'COMPLETED', 'Completed'
         CANCELLED = 'CANCELLED', 'Cancelled'
 
+    objects = models.Manager()
+
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='appointments')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='appointments')
     appointment_date = models.DateField()
@@ -41,6 +43,7 @@ class Appointment(models.Model):
 
 
 class MedicalRecord(models.Model):
+    objects = models.Manager()
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='medical_records')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='medical_records')
     appointment = models.ForeignKey(Appointment, on_delete=models.SET_NULL, null=True, blank=True, related_name='medical_records')
@@ -62,6 +65,7 @@ class MedicalRecord(models.Model):
 
 
 class Prescription(models.Model):
+    objects = models.Manager()
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='prescriptions')
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='prescriptions')
     appointment = models.ForeignKey(Appointment, on_delete=models.SET_NULL, null=True, blank=True, related_name='prescriptions')
@@ -95,6 +99,8 @@ class AppointmentBilling(models.Model):
         PENDING = 'PENDING', 'Pending'
         PAID = 'PAID', 'Paid'
         WAIVED = 'WAIVED', 'Waived'
+
+    objects = models.Manager()
 
     appointment = models.OneToOneField(Appointment, on_delete=models.CASCADE, related_name='billing')
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='appointment_bills')

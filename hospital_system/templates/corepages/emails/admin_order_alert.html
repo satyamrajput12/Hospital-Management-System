@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Order Alert - Medicare Pharmacy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    .badge-status {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: #10b981;
+      color: #ffffff;
+    }
+    .content {
+      padding: 28px 24px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 18px 0 8px 0;
+    }
+    .table-details {
+      width: 100%;
+      border-collapse: collapse;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .table-details td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13.5px;
+    }
+    .table-details td.label {
+      color: #64748b;
+      font-weight: 500;
+      width: 38%;
+    }
+    .table-details td.val {
+      color: #0f172a;
+      font-weight: 600;
+      text-align: right;
+    }
+    .val-paid {
+      color: #16a34a;
+      font-weight: 700;
+    }
+    .val-unpaid {
+      color: #ea580c;
+      font-weight: 700;
+    }
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      margin-bottom: 16px;
+    }
+    .items-table th {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 12px;
+      text-align: left;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+    .items-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13.5px;
+    }
+    .btn-action {
+      display: inline-block;
+      background: #0284c7;
+      color: #ffffff !important;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-top: 12px;
+    }
+    .footer {
+      background: #0f172a;
+      color: #94a3b8;
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>💊 Medicare Pharmacy Admin</h1>
+      <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">New Order Placement Notification</p>
+      <div class="badge-status">New Order • #{{ order.order_number }}</div>
+    </div>
+
+    <div class="content">
+      <p style="font-size: 15px; margin-top: 0;">
+        Hello Administrator,<br>
+        A new pharmacy prescription/medicine order has been placed by <strong>{{ order.full_name }}</strong>.
+      </p>
+
+      <div class="section-title">👤 Customer & Delivery Info</div>
+      <table class="table-details">
+        <tr>
+          <td class="label">Customer Name:</td>
+          <td class="val">{{ order.full_name }}</td>
+        </tr>
+        <tr>
+          <td class="label">Email:</td>
+          <td class="val">{{ order.email }}</td>
+        </tr>
+        <tr>
+          <td class="label">Phone:</td>
+          <td class="val">{{ order.phone }}</td>
+        </tr>
+        <tr>
+          <td class="label">Shipping Address:</td>
+          <td class="val">{{ order.shipping_address }}, {{ order.city }} - {{ order.postal_code }}</td>
+        </tr>
+        <tr>
+          <td class="label">Payment Method:</td>
+          <td class="val">{{ order.get_payment_method_display }}</td>
+        </tr>
+        <tr>
+          <td class="label">Payment Status:</td>
+          <td class="val {% if order.payment_status == 'PAID' %}val-paid{% else %}val-unpaid{% endif %}">
+            {{ order.get_payment_status_display }}
+          </td>
+        </tr>
+      </table>
+
+      <div class="section-title">📦 Ordered Medicines</div>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th style="text-align: center;">Qty</th>
+            <th style="text-align: right;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td style="font-weight: 600;">{{ item.product_name }}</td>
+            <td style="text-align: center;">{{ item.quantity }}</td>
+            <td style="text-align: right; font-weight: 700;">₹{{ item.subtotal }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <table class="table-details" style="margin-top: 10px;">
+        <tr>
+          <td class="label">Items Subtotal:</td>
+          <td class="val">₹{{ subtotal }}</td>
+        </tr>
+        <tr>
+          <td class="label">Delivery Charge:</td>
+          <td class="val">{% if shipping == 0 %}FREE{% else %}₹{{ shipping }}{% endif %}</td>
+        </tr>
+        <tr style="border-top: 2px dashed #cbd5e1;">
+          <td class="label" style="font-weight: 800; font-size: 15px; color: #0284c7;">Total Order Value:</td>
+          <td class="val" style="font-weight: 800; font-size: 16px; color: #0284c7;">₹{{ order.total_amount }}</td>
+        </tr>
+      </table>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="http://127.0.0.1:8000/manage/orders/" class="btn-action">
+          Open Pharmacy Order Console &rarr;
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <strong>Medicare Healthcare Management System</strong><br>
+      Pharmacy Department • Automated Admin Dispatch Alert
+    </div>
+  </div>
+</body>
+</html>
+

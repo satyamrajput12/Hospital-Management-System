@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Status Update - Medicare Pharmacy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .header {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      padding: 30px 24px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .badge-status {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 6px 18px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: #ffffff;
+      color: #0369a1;
+    }
+    .content {
+      padding: 28px 24px;
+    }
+    .status-highlight-box {
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 22px;
+      text-align: center;
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      color: #854d0e;
+    }
+    .status-delivered {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+    .status-cancelled {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+    .status-shipped {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1e40af;
+    }
+    .status-processing {
+      background: #fefce8;
+      border-color: #fef08a;
+      color: #854d0e;
+    }
+    .table-details {
+      width: 100%;
+      border-collapse: collapse;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .table-details td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13.5px;
+    }
+    .table-details td.label {
+      color: #64748b;
+      font-weight: 500;
+      width: 38%;
+    }
+    .table-details td.val {
+      color: #0f172a;
+      font-weight: 600;
+      text-align: right;
+    }
+    .btn-track {
+      display: inline-block;
+      background: #0284c7;
+      color: #ffffff !important;
+      padding: 12px 26px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      margin-top: 14px;
+    }
+    .footer {
+      background: #0f172a;
+      color: #94a3b8;
+      text-align: center;
+      padding: 22px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>💊 Medicare Doorstep Pharmacy</h1>
+      <p style="margin: 4px 0 0 0; color: #e0f2fe; font-size: 13px;">Medicine Order Status Update</p>
+      <div class="badge-status">Order #{{ order.order_number }}</div>
+    </div>
+
+    <div class="content">
+      <p style="font-size: 15px; margin-top: 0;">
+        Dear <strong>{{ order.full_name }}</strong>,<br>
+        Your pharmacy order status has been updated. Here are the latest details:
+      </p>
+
+      <!-- Status Highlight Banner -->
+      <div class="status-highlight-box {% if order.status == 'DELIVERED' %}status-delivered{% elif order.status == 'CANCELLED' %}status-cancelled{% elif order.status == 'SHIPPED' %}status-shipped{% else %}status-processing{% endif %}">
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Current Status</div>
+        <div style="font-size: 22px; font-weight: 800; margin: 4px 0;">{{ order.get_status_display }}</div>
+        {% if order.status == 'SHIPPED' %}
+          <div style="font-size: 13px;">Your package is out for delivery with our courier partner.</div>
+        {% elif order.status == 'DELIVERED' %}
+          <div style="font-size: 13px;">Package has been safely delivered to your doorstep. Thank you!</div>
+        {% elif order.status == 'PROCESSING' %}
+          <div style="font-size: 13px;">Our licensed pharmacist is packing and inspecting your medicines.</div>
+        {% elif order.status == 'CANCELLED' %}
+          <div style="font-size: 13px;">This order has been cancelled. Any pre-paid amount has been initiated for refund.</div>
+        {% endif %}
+      </div>
+
+      <!-- Order Details -->
+      <table class="table-details">
+        <tr>
+          <td class="label">Order Number:</td>
+          <td class="val" style="color: #0284c7;">#{{ order.order_number }}</td>
+        </tr>
+        <tr>
+          <td class="label">Order Placed On:</td>
+          <td class="val">{{ order.created_at|date:"F d, Y, h:i A" }}</td>
+        </tr>
+        <tr>
+          <td class="label">Payment Method:</td>
+          <td class="val">{{ order.get_payment_method_display }}</td>
+        </tr>
+        <tr>
+          <td class="label">Total Amount:</td>
+          <td class="val" style="font-weight: 800; color: #0284c7;">₹{{ order.total_amount }}</td>
+        </tr>
+        <tr>
+          <td class="label">Delivery Address:</td>
+          <td class="val">{{ order.shipping_address }}, {{ order.city }}</td>
+        </tr>
+        {% if order.notes %}
+        <tr>
+          <td class="label">Pharmacy Notes:</td>
+          <td class="val" style="font-style: italic;">{{ order.notes }}</td>
+        </tr>
+        {% endif %}
+      </table>
+
+      <div style="text-align: center;">
+        <a href="http://127.0.0.1:8000/orders/my/" class="btn-track">
+          Track in Patient Dashboard &rarr;
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <strong>Medicare Healthcare Management & Pharmacy Network</strong><br>
+      24/7 Patient Helpline: <strong>Dial 108 / 102</strong><br>
+      Licensed Doorstep Pharmacy • Certified Quality Medicine
+    </div>
+  </div>
+</body>
+</html>
+

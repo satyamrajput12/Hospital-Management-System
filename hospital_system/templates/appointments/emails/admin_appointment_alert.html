@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Appointment Alert - Medicare Hospital</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+    .badge-status {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 5px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: #0ea5e9;
+      color: #ffffff;
+    }
+    .badge-status-cancelled {
+      background: #ef4444;
+    }
+    .val-cancelled {
+      color: #dc2626;
+      font-weight: 700;
+    }
+    .val-normal {
+      color: #0284c7;
+      font-weight: 700;
+    }
+    .content {
+      padding: 28px 24px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 18px 0 8px 0;
+    }
+    .table-details {
+      width: 100%;
+      border-collapse: collapse;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .table-details td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 13.5px;
+    }
+    .table-details td.label {
+      color: #64748b;
+      font-weight: 500;
+      width: 38%;
+    }
+    .table-details td.val {
+      color: #0f172a;
+      font-weight: 600;
+      text-align: right;
+    }
+    .btn-action {
+      display: inline-block;
+      background: #0284c7;
+      color: #ffffff !important;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-top: 12px;
+    }
+    .footer {
+      background: #0f172a;
+      color: #94a3b8;
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <h1>🏥 Medicare Hospital Administration</h1>
+      <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 13px;">Automated System Alert</p>
+      <div class="badge-status {% if event_type == 'cancelled' %}badge-status-cancelled{% endif %}">{{ event_title }} • Booking #{{ appointment.pk }}</div>
+    </div>
+
+    <div class="content">
+      <p style="font-size: 15px; margin-top: 0;">
+        Hello Administrator,<br>
+        An appointment event <strong>({{ event_title }})</strong> has been recorded in the system.
+      </p>
+
+      <div class="section-title">👤 Patient Details</div>
+      <table class="table-details">
+        <tr>
+          <td class="label">Patient Name:</td>
+          <td class="val">{{ patient.get_full_name|default:patient.username }}</td>
+        </tr>
+        <tr>
+          <td class="label">Patient Email:</td>
+          <td class="val">{{ patient.email|default:"N/A" }}</td>
+        </tr>
+        <tr>
+          <td class="label">Patient Phone:</td>
+          <td class="val">{{ patient.phone|default:"N/A" }}</td>
+        </tr>
+      </table>
+
+      <div class="section-title">👨‍⚕️ Doctor & Schedule</div>
+      <table class="table-details">
+        <tr>
+          <td class="label">Assigned Doctor:</td>
+          <td class="val">Dr. {{ doctor.user.get_full_name }}</td>
+        </tr>
+        <tr>
+          <td class="label">Department:</td>
+          <td class="val">{{ doctor.department.name|default:"General Medicine" }}</td>
+        </tr>
+        <tr>
+          <td class="label">Specialization:</td>
+          <td class="val">{{ doctor.specialization }}</td>
+        </tr>
+        <tr>
+          <td class="label">Date & Time:</td>
+          <td class="val">{{ date_str }} at {{ time_str }}</td>
+        </tr>
+        <tr>
+          <td class="label">Status:</td>
+          <td class="val {% if appointment.status == 'CANCELLED' %}val-cancelled{% else %}val-normal{% endif %}">
+            {{ appointment.get_status_display }}
+          </td>
+        </tr>
+        <tr>
+          <td class="label">Consultation Fee:</td>
+          <td class="val">₹{{ doctor.consultation_fee }}</td>
+        </tr>
+        <tr>
+          <td class="label">Reason / Symptoms:</td>
+          <td class="val" style="font-style: italic;">{{ appointment.reason|default:"N/A" }}</td>
+        </tr>
+      </table>
+
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="http://127.0.0.1:8000/appointments/admin/all/" class="btn-action">
+          Manage All Appointments in Portal &rarr;
+        </a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <strong>Medicare Healthcare Management System</strong><br>
+      Hospital Administrative Operations Desk • Automated Alert
+    </div>
+  </div>
+</body>
+</html>
+

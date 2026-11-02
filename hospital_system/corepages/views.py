@@ -18,7 +18,7 @@ from appointments.models import Appointment, MedicalRecord, Prescription
 from departments.models import Department, LabTest, LabBooking
 from doctors.models import Doctor
 from .cart import get_or_create_cart, cart_to_dict
-from .emails import send_order_confirmation_email
+from .emails import send_order_confirmation_email, send_order_status_update_email
 from .forms import CheckoutForm, ProductForm, ProductCategoryForm, OrderStatusUpdateForm
 from .models import ProductCategory, Product, Cart, CartItem, Order, OrderItem, PaymentRecord
 
@@ -465,6 +465,7 @@ def cancel_order(request, pk):
                 item.product.stock += item.quantity
                 item.product.save()
 
+    send_order_status_update_email(order, old_status=Order.Status.PENDING)
     messages.success(request, f"Order #{order.order_number} has been cancelled and stock returned.")
     return redirect('core:my_orders')
 
@@ -648,11 +649,14 @@ def admin_order_list(request):
 @admin_required
 def admin_order_update_status(request, pk):
     order = get_object_or_404(Order, pk=pk)
+    old_status = order.status
     if request.method == 'POST':
         form = OrderStatusUpdateForm(request.POST, instance=order)
         if form.is_valid():
-            form.save()
-            messages.success(request, f"Order #{order.order_number} status updated to {order.get_status_display()}.")
+            updated_order = form.save()
+            if updated_order.status != old_status:
+                send_order_status_update_email(updated_order, old_status=old_status)
+            messages.success(request, f"Order #{updated_order.order_number} status updated to {updated_order.get_status_display()}.")
             return redirect('core:admin_order_list')
     else:
         form = OrderStatusUpdateForm(instance=order)

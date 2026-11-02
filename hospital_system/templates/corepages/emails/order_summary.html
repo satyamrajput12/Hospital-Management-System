@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Summary - Medicare Doorstep Pharmacy</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .header {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      color: #ffffff;
+      padding: 32px 28px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      margin: 6px 0 0 0;
+      font-size: 14px;
+      color: #e0f2fe;
+    }
+    .badge-status {
+      display: inline-block;
+      margin-top: 14px;
+      background: #ffffff;
+      color: #0369a1;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .content {
+      padding: 30px 28px;
+    }
+    .greeting {
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .card-info {
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+    .info-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+    .info-val {
+      color: #0f172a;
+      font-weight: 600;
+      text-align: right;
+    }
+    .table-container {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+    .table-container th {
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: left;
+      padding: 10px 14px;
+      border-radius: 6px;
+    }
+    .table-container td {
+      padding: 14px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+      color: #334155;
+    }
+    .totals-box {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-top: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 14px;
+      color: #475569;
+    }
+    .totals-grand {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 10px;
+      margin-top: 8px;
+      border-top: 2px dashed #cbd5e1;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0369a1;
+    }
+    .shipping-box {
+      margin-top: 24px;
+      padding: 16px 20px;
+      border-left: 4px solid #0284c7;
+      background: #f0f9ff;
+      border-radius: 0 12px 12px 0;
+      font-size: 14px;
+      color: #0369a1;
+    }
+    .text-paid {
+      color: #16a34a;
+      font-weight: 700;
+    }
+    .text-cod {
+      color: #ea580c;
+      font-weight: 700;
+    }
+    .fee-free {
+      color: #16a34a;
+      font-weight: 600;
+    }
+    .fee-standard {
+      color: #334155;
+      font-weight: 600;
+    }
+    .footer {
+      background: #0f172a;
+      color: #94a3b8;
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .footer strong {
+      color: #f8fafc;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>💊 Medicare Doorstep Pharmacy</h1>
+      <p>Official Order Confirmation & Invoice Summary</p>
+      <div class="badge-status">Order Confirmed • #{{ order.order_number }}</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+      <p class="greeting">
+        Dear <strong>{{ order.full_name }}</strong>,<br>
+        Thank you for choosing Medicare Healthcare Pharmacy. Your medicine order has been received and is being prepared by our licensed pharmacists.
+      </p>
+
+      <!-- Key Metadata Box -->
+      <table style="width: 100%; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; padding: 14px; margin-bottom: 24px;">
+        <tr>
+          <td style="color: #64748b; font-size: 13px; padding: 4px 8px;">Order Number:</td>
+          <td style="font-weight: 700; color: #0284c7; font-size: 14px; text-align: right; padding: 4px 8px;">#{{ order.order_number }}</td>
+        </tr>
+        <tr>
+          <td style="color: #64748b; font-size: 13px; padding: 4px 8px;">Order Date:</td>
+          <td style="font-weight: 600; color: #1e293b; font-size: 13px; text-align: right; padding: 4px 8px;">{{ order.created_at|date:"F d, Y, h:i A" }}</td>
+        </tr>
+        <tr>
+          <td style="color: #64748b; font-size: 13px; padding: 4px 8px;">Payment Mode:</td>
+          <td style="font-weight: 600; color: #1e293b; font-size: 13px; text-align: right; padding: 4px 8px;">{{ order.get_payment_method_display }}</td>
+        </tr>
+        <tr>
+          <td style="color: #64748b; font-size: 13px; padding: 4px 8px;">Payment Status:</td>
+          <td class="{% if order.payment_status == 'PAID' %}text-paid{% else %}text-cod{% endif %}" style="font-size: 13px; text-align: right; padding: 4px 8px;">
+            {{ order.get_payment_status_display }}
+          </td>
+        </tr>
+      </table>
+
+      <!-- Items Table -->
+      <h3 style="font-size: 16px; margin: 0 0 12px 0; color: #0f172a;">Medicines & Items Ordered</h3>
+      <table class="table-container">
+        <thead>
+          <tr>
+            <th style="padding: 10px 12px;">Item</th>
+            <th style="padding: 10px 12px; text-align: center;">Qty</th>
+            <th style="padding: 10px 12px; text-align: right;">Unit Price</th>
+            <th style="padding: 10px 12px; text-align: right;">Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order.items.all %}
+          <tr>
+            <td style="font-weight: 600; color: #1e293b;">{{ item.product_name }}</td>
+            <td style="text-align: center; color: #475569;">{{ item.quantity }}</td>
+            <td style="text-align: right; color: #475569;">₹{{ item.unit_price }}</td>
+            <td style="text-align: right; font-weight: 700; color: #0f172a;">₹{{ item.subtotal }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Totals Breakdown -->
+      <table style="width: 100%; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; padding: 14px; margin-top: 10px;">
+        <tr>
+          <td style="color: #64748b; font-size: 14px; padding: 4px 8px;">Medicines Subtotal:</td>
+          <td style="text-align: right; font-weight: 600; color: #334155; font-size: 14px; padding: 4px 8px;">₹{{ subtotal }}</td>
+        </tr>
+        <tr>
+          <td style="color: #64748b; font-size: 14px; padding: 4px 8px;">Doorstep Delivery Fee:</td>
+          <td class="{% if shipping == 0 %}fee-free{% else %}fee-standard{% endif %}" style="text-align: right; font-size: 14px; padding: 4px 8px;">
+            {% if shipping == 0 %}FREE (Orders &gt; ₹500){% else %}₹{{ shipping }}{% endif %}
+          </td>
+        </tr>
+        <tr style="border-top: 2px dashed #cbd5e1;">
+          <td style="color: #0369a1; font-weight: 800; font-size: 17px; padding: 10px 8px 4px 8px;">Grand Total:</td>
+          <td style="text-align: right; font-weight: 800; color: #0369a1; font-size: 19px; padding: 10px 8px 4px 8px;">₹{{ order.total_amount }}</td>
+        </tr>
+      </table>
+
+      <!-- Delivery Address Card -->
+      <div class="shipping-box">
+        <strong style="display: block; margin-bottom: 4px; font-size: 15px;">📦 Delivery Address:</strong>
+        <div>{{ order.shipping_address }}</div>
+        <div>{{ order.city }} - {{ order.postal_code }}</div>
+        <div style="margin-top: 4px; color: #0284c7;"><strong>Recipient Contact:</strong> {{ order.phone }}</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <strong>Medicare Healthcare Management & Emergency Network</strong><br>
+      24/7 Patient Helpline: <strong>Dial 108 / 102</strong> | Trauma Center Wing<br>
+      Pharmacy License No: DL-PH-2024-98431 • Genuine & Temperature-Controlled Medication<br>
+      You can track this order anytime on your <a href="http://127.0.0.1:8000/orders/my/" style="color: #38bdf8; text-decoration: underline;">Medicare Dashboard</a>.
+    </div>
+  </div>
+</body>
+</html>
+

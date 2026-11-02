@@ -43,7 +43,11 @@
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       min-height: 100vh;
-      background: linear-gradient(135deg, #091326 0%, #0d213f 50%, #102a4e 100%);
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(circle at 12% 18%, rgba(2, 132, 199, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 88% 82%, rgba(14, 165, 233, 0.06) 0%, transparent 45%),
+        linear-gradient(180deg, #f0f6fc 0%, #f8fafc 40%, #ffffff 100%);
       color: var(--text-main);
       display: flex;
       flex-direction: column;
@@ -66,8 +70,8 @@
       left: -5%;
       width: 550px;
       height: 550px;
-      background: radial-gradient(circle, rgba(2, 132, 199, 0.22) 0%, transparent 70%);
-      filter: blur(50px);
+      background: radial-gradient(circle, rgba(2, 132, 199, 0.10) 0%, transparent 70%);
+      filter: blur(80px);
     }
 
     .ambient-circle-2 {
@@ -76,103 +80,42 @@
       right: -5%;
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(5, 150, 105, 0.18) 0%, transparent 70%);
-      filter: blur(60px);
+      background: radial-gradient(circle, rgba(5, 150, 105, 0.08) 0%, transparent 70%);
+      filter: blur(90px);
     }
 
     .ambient-grid {
       position: absolute;
       inset: 0;
       background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
+        linear-gradient(rgba(15, 23, 42, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9) 0%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.9) 0%, transparent 80%);
     }
 
-    /* TOP EMERGENCY & AMBULANCE HEADER */
-    .emergency-topbar {
-      position: relative;
-      z-index: 20;
-      background: rgba(10, 19, 41, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 10px 0;
-    }
-
-    .emergency-pulse-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #fecaca;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 5px 14px;
-      border-radius: 50px;
-    }
-
-    .siren-dot {
-      width: 10px;
-      height: 10px;
-      background-color: var(--emergency-red);
-      border-radius: 50%;
-      box-shadow: 0 0 12px var(--emergency-red);
-      animation: sirenBlink 0.9s infinite alternate;
-    }
-
-    @keyframes sirenBlink {
-      0% { opacity: 0.3; transform: scale(0.85); }
-      100% { opacity: 1; transform: scale(1.25); filter: drop-shadow(0 0 8px #ef4444); }
-    }
-
-    .ambulance-dial {
-      color: #ffffff;
-      text-decoration: none;
-      font-weight: 800;
-      background: var(--emergency-red-dark);
-      padding: 4px 12px;
-      border-radius: 20px;
-      transition: all 0.2s ease;
+    /* BACK TO HOME BUTTON */
+    .btn-back-home {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-    }
-
-    .ambulance-dial:hover {
-      background: #b91c1c;
-      color: #fff;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
-    }
-
-    .topbar-info {
-      color: #94a3b8;
-      font-size: 13px;
-      display: inline-flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .back-home-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
       font-size: 13px;
       font-weight: 600;
-      padding: 6px 16px;
+      padding: 6px 14px;
       border-radius: 50px;
       text-decoration: none;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
 
-    .back-home-link:hover {
-      background: rgba(255, 255, 255, 0.18);
-      color: #ffffff;
-      transform: translateX(-3px);
+    .btn-back-home:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+      transform: translateX(-2px);
     }
 
     /* MAIN CONTAINER */
@@ -181,7 +124,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 36px 16px;
+      padding: 40px 16px;
       position: relative;
       z-index: 10;
     }
@@ -189,10 +132,13 @@
     .register-card {
       width: 100%;
       max-width: 1160px;
-      background: rgba(255, 255, 255, 0.98);
-      backdrop-filter: blur(20px);
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
       border-radius: var(--radius-lg);
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      box-shadow: 
+        0 20px 45px -10px rgba(15, 23, 42, 0.08),
+        0 8px 18px -4px rgba(15, 23, 42, 0.03),
+        0 1px 3px 0 rgba(15, 23, 42, 0.04);
       display: flex;
       overflow: hidden;
       min-height: 720px;
@@ -201,7 +147,7 @@
     /* LEFT HERO: MEDICAL TEAM & PATIENT BENEFITS */
     .register-hero {
       flex: 1;
-      background: linear-gradient(180deg, rgba(8, 24, 48, 0.84) 0%, rgba(9, 19, 39, 0.95) 100%),
+      background: linear-gradient(175deg, rgba(8, 28, 54, 0.90) 0%, rgba(9, 23, 44, 0.96) 100%),
                   url("{% static 'images/hospital_care_team.jpg' %}") center/cover no-repeat;
       position: relative;
       padding: 44px 38px;
@@ -588,39 +534,6 @@
     <div class="ambient-grid"></div>
   </div>
 
-  <!-- TOP EMERGENCY AMBULANCE BAR -->
-  <div class="emergency-topbar">
-    <div class="container-fluid px-3 px-md-4 d-flex align-items-center justify-content-between">
-      
-      <!-- Left: 24x7 Ambulance SOS -->
-      <div class="d-flex align-items-center gap-2 gap-md-3">
-        <div class="emergency-pulse-badge">
-          <span class="siren-dot"></span>
-          <span>24/7 AMBULANCE</span>
-        </div>
-        <a href="tel:108" class="ambulance-dial">
-          <i class="bi bi-telephone-fill"></i> DIAL 108 / 102
-        </a>
-      </div>
-
-      <!-- Center: Emergency Fleet Status -->
-      <div class="topbar-info">
-        <span><i class="bi bi-hospital text-info me-1"></i> Medicare Multi-Speciality Hospital</span>
-        <span><i class="bi bi-shield-check text-success me-1"></i> Free Digital Registration</span>
-        <span><i class="bi bi-telephone text-warning me-1"></i> Helpline: 1800-419-1100</span>
-      </div>
-
-      <!-- Right: Back to Home -->
-      <div>
-        <a href="{% url 'core:home' %}" class="back-home-link">
-          <i class="bi bi-arrow-left"></i>
-          <span>Back to Home</span>
-        </a>
-      </div>
-
-    </div>
-  </div>
-
   <!-- MAIN REGISTRATION CONTAINER -->
   <main class="register-main">
     <div class="register-card">
@@ -699,15 +612,21 @@
       <div class="register-form-side">
 
         <!-- Hospital Brand Header -->
-        <a href="{% url 'core:home' %}" class="portal-brand">
-          <div class="brand-icon-box">
-            <i class="bi bi-hospital"></i>
-          </div>
-          <div class="brand-text">
-            <h4>Medicare Hospital</h4>
-            <span>Patient Registration Portal</span>
-          </div>
-        </a>
+        <div class="d-flex align-items-center justify-content-between mb-4">
+          <a href="{% url 'core:home' %}" class="portal-brand mb-0">
+            <div class="brand-icon-box">
+              <i class="bi bi-hospital"></i>
+            </div>
+            <div class="brand-text">
+              <h4>Medicare Hospital</h4>
+              <span>Patient Registration Portal</span>
+            </div>
+          </a>
+          <a href="{% url 'core:home' %}" class="btn-back-home" title="Back to Home">
+            <i class="bi bi-arrow-left"></i>
+            <span>Home</span>
+          </a>
+        </div>
 
         <h2 class="form-heading">Create Patient Account</h2>
         <p class="form-desc">Fill in your medical & contact details to register with Medicare Hospital.</p>
@@ -779,51 +698,27 @@
             </div>
           </div>
 
-          <!-- Row 2: Username & Email -->
-          <div class="row g-2">
-            <div class="col-sm-6 form-group-custom">
-              <label class="form-label-custom" for="id_username">
-                Username <span class="text-danger">*</span>
-              </label>
-              <div class="input-wrapper">
-                <i class="bi bi-at input-icon"></i>
-                <input type="text" 
-                       name="username" 
-                       id="id_username" 
-                       class="form-control-custom" 
-                       placeholder="e.g. rahulsharma" 
-                       value="{{ form.username.value|default:'' }}" 
-                       required>
-              </div>
-              {% if form.username.errors %}
-                <div class="field-error-msg">
-                  <i class="bi bi-exclamation-circle-fill"></i>
-                  <span>{{ form.username.errors.0 }}</span>
-                </div>
-              {% endif %}
+          <!-- Row 2: Email Address (Primary Account Identity) -->
+          <div class="form-group-custom">
+            <label class="form-label-custom" for="id_email">
+              Email Address <span class="text-danger">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i class="bi bi-envelope input-icon"></i>
+              <input type="email" 
+                     name="email" 
+                     id="id_email" 
+                     class="form-control-custom" 
+                     placeholder="e.g. rahul@example.com" 
+                     value="{{ form.email.value|default:'' }}" 
+                     required>
             </div>
-
-            <div class="col-sm-6 form-group-custom">
-              <label class="form-label-custom" for="id_email">
-                Email Address <span class="text-danger">*</span>
-              </label>
-              <div class="input-wrapper">
-                <i class="bi bi-envelope input-icon"></i>
-                <input type="email" 
-                       name="email" 
-                       id="id_email" 
-                       class="form-control-custom" 
-                       placeholder="e.g. rahul@example.com" 
-                       value="{{ form.email.value|default:'' }}" 
-                       required>
+            {% if form.email.errors %}
+              <div class="field-error-msg">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ form.email.errors.0 }}</span>
               </div>
-              {% if form.email.errors %}
-                <div class="field-error-msg">
-                  <i class="bi bi-exclamation-circle-fill"></i>
-                  <span>{{ form.email.errors.0 }}</span>
-                </div>
-              {% endif %}
-            </div>
+            {% endif %}
           </div>
 
           <!-- Row 3: Phone (Ambulance/Emergency Contact) & Date of Birth -->
